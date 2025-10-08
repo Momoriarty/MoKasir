@@ -27,7 +27,7 @@ class AuthController extends Controller
             'password.min' => 'Password minimal 3 karakter.',
         ]);
 
-        $data = [
+        $data = [a
             ['username' => 'farhan', 'password' => '1234', 'role' => 'admin'],
             ['username' => 'arifin', 'password' => 'anto', 'role' => 'admin'],
             ['username' => 'hapis', 'password' => 'jawa', 'role' => 'karyawan'],

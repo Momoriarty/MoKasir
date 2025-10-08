@@ -27,18 +27,22 @@ class AuthController extends Controller
 
         $data = [
             ['username' => 'farhan', 'password' => '1234', 'role' => 'admin'],
+            ['username' => 'arifin', 'password' => 'hama', 'role' => 'admin'],
             ['username' => 'hapis', 'password' => 'jawa', 'role' => 'karyawan'],
         ];
 
-        foreach ($data as $no => $user) {
+        foreach ($data as $user) {
             if ($request->username === $user['username'] && $request->password === $user['password']) {
+                // kirim data user ke halaman admin
+                session(['user' => $user]);
                 if ($user['role'] === 'admin') {
-                    return redirect()->route('admin.index')->with('success', 'Selamat Datang Admin!' . $user['username']);
+                    return view('admin.index', ['user' => $user]);
                 } else {
-                    return redirect()->route('karyawan.index')->with('success', 'Selamat Datang Admin!' . $user['username']);
+                    return view('karyawan.index', ['user' => $user]);
                 }
             }
         }
+
         return redirect()->route('signin')->with('error', 'Username atau Password salah!');
 
     }

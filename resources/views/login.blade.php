@@ -1,51 +1,60 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login SJC</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login SJC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500">
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900 flex items-center justify-center">
 
-    <div class="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl w-full max-w-sm border border-white/20">
-        <h2 class="text-3xl font-bold text-white text-center mb-6">✨ Login SJC ✨</h2>
+  <div class="relative w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-8 shadow-2xl">
+    <!-- Glow effect -->
+    <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-30 animate-pulse"></div>
 
-        @if (session('error'))
-            <div class="bg-red-500/80 text-white text-center py-2 rounded-lg mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if (session('success'))
-            <div class="bg-green-500/80 text-white text-center py-2 rounded-lg mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
+    <div class="relative z-10">
+      <h2 class="text-3xl font-bold text-center text-white mb-6">Login ke <span class="text-pink-400">SJC</span></h2>
 
-        <form action="{{ route('login.process') }}" method="POST" class="space-y-5">
-            @csrf
-            <div>
-                <label class="text-white text-sm font-semibold">Username</label>
-                <input type="text" name="username" required
-                    class="w-full mt-1 p-3 rounded-lg bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                    placeholder="Masukkan username...">
-            </div>
+      @if (session('error'))
+        <div class="bg-red-500/70 text-white text-center py-2 rounded-lg mb-4">
+          {{ session('error') }}
+        </div>
+      @endif
 
-            <div>
-                <label class="text-white text-sm font-semibold">Password</label>
-                <input type="password" name="password" required
-                    class="w-full mt-1 p-3 rounded-lg bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                    placeholder="Masukkan password...">
-            </div>
+      @if (session('success'))
+        <div class="bg-green-500/70 text-white text-center py-2 rounded-lg mb-4">
+          {{ session('success') }}
+        </div>
+      @endif
 
-            <button type="submit"
-                class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-lg shadow-lg hover:scale-105 transition-transform duration-200">
-                Login Sekarang 🚀
-            </button>
-        </form>
+      <form action="{{ route('login.process') }}" method="POST" class="space-y-5">
+        @csrf
+        <div>
+          <label class="text-sm text-gray-200 font-semibold">Username</label>
+          <input type="text" name="username" required
+                 class="w-full mt-1 p-3 bg-white/10 border border-white/20 text-white rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                 placeholder="Masukkan username">
+        </div>
+
+        <div>
+          <label class="text-sm text-gray-200 font-semibold">Password</label>
+          <input type="password" name="password" required
+                 class="w-full mt-1 p-3 bg-white/10 border border-white/20 text-white rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                 placeholder="Masukkan password">
+        </div>
+
+        <button type="submit"
+                class="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold rounded-lg shadow-md hover:shadow-xl hover:scale-105 transition-all duration-200">
+          Masuk Sekarang 🚀
+        </button>
+      </form>
+
+      <p class="text-gray-400 text-center mt-6 text-sm">
+        © 2025 <span class="text-pink-400 font-semibold">SJC Career Center</span>
+      </p>
     </div>
-</body>
+  </div>
 
+</body>
 </html>

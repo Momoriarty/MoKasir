@@ -5,6 +5,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+
 
 class AuthController extends Controller
 {
@@ -27,15 +29,20 @@ class AuthController extends Controller
 
         $data = [
             ['username' => 'farhan', 'password' => '1234', 'role' => 'admin'],
+            ['username' => 'arifin', 'password' => 'anto', 'role' => 'admin'],
             ['username' => 'hapis', 'password' => 'jawa', 'role' => 'karyawan'],
         ];
 
         foreach ($data as $no => $user) {
             if ($request->username === $user['username'] && $request->password === $user['password']) {
+
+                Session::put('username', $user['username']);
+                Session::put('role', $user['role']);
+
                 if ($user['role'] === 'admin') {
-                    return redirect()->route('admin.index')->with('success', 'Selamat Datang Admin!' . $user['username']);
+                    return redirect()->route('admin.index');
                 } else {
-                    return redirect()->route('karyawan.index')->with('success', 'Selamat Datang Admin!' . $user['username']);
+                    return redirect()->route('karyawan.index');
                 }
             }
         }
@@ -53,14 +60,14 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 

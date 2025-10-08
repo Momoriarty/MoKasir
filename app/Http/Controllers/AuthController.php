@@ -13,31 +13,35 @@ class AuthController extends Controller
         return view('login');
     }
 
-    public function login(Request $request)
-{
-    $request->validate([
-        'username' => 'required',
-        'password' => [
-            'required',
-            'min:3',
-            'regex:/[A-Z]/' // harus ada huruf kapital
-        ],
-    ], [
-        'password.min' => 'Password minimal 3 karakter.',
-        'password.regex' => 'Password harus mengandung minimal 1 huruf kapital.',
-    ]);
+    public function process(Request $request)
+    {
+        $request->validate([
+            'username' => 'required',
+            'password' => [
+                'required',
+                'min:3',
+            ],
+        ], [
+            'password.min' => 'Password minimal 3 karakter.',
+        ]);
 
-    $nim = "2455301030";
-    $nimp = "2455301030A";
+        $data = [
+            ['username' => 'farhan', 'password' => '1234', 'role' => 'admin'],
+            ['username' => 'hapis', 'password' => 'jawa', 'role' => 'karyawan'],
+        ];
 
-    // 🔹 Cek apakah username & password sesuai NIM
-    if ($request->username === $nim && $request->password === $nimp) {
-        return redirect()->route('login')->with('success', 'Login berhasil! Selamat datang.');
-    } else {
-        return redirect()->route('login')->with('error', 'Username atau Password salah!');
+        foreach ($data as $no => $user) {
+            if ($request->username === $user['username'] && $request->password === $user['password']) {
+                if ($user['role'] === 'admin') {
+                    return redirect()->route('admin.index')->with('success', 'Selamat Datang Admin!' . $user['username']);
+                } else {
+                    return redirect()->route('karyawan.index')->with('success', 'Selamat Datang Admin!' . $user['username']);
+                }
+            }
+        }
+        return redirect()->route('signin')->with('error', 'Username atau Password salah!');
+
     }
-}
-
 
     // Menampilkan form register
     public function showRegister()

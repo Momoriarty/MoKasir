@@ -14,6 +14,10 @@ class AuthController extends Controller
     {
         return view('login');
     }
+    public function showRegister()
+    {
+        return view('register');
+    }
 
     public function process(Request $request)
     {
@@ -50,28 +54,21 @@ class AuthController extends Controller
 
     }
 
-    // Menampilkan form register
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    // Proses register
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'name' => 'required',
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        // User::create([
+        //     'name' => $request->name,
+        //     'email' => $request->email,
+        //     'password' => Hash::make($request->password),
+        // ]);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil, silakan login.');
+        return redirect()->route('signin')->with('success', 'Registrasi berhasil, silakan login.');
     }
 
     // Proses logout

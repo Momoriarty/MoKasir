@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('transaksi', function (Blueprint $table) {
+        Schema::create('transaksis', function (Blueprint $table) {
             $table->id('id_transaksi');
             $table->dateTime('tanggal');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();

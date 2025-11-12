@@ -23,6 +23,8 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('/home', HomeController::class);
 Route::get('/signin', action: [AuthController::class, 'showLogin'])->name('signin');
+Route::get('/signup', action: [AuthController::class, 'showRegister'])->name('signup');
+Route::post('/signupProses', [AuthController::class, 'register'])->name('register.post');
 Route::get('/go/{id}', action: [HomeController::class, 'RedirectTo'])->name('go');
 Route::post('/home/store', [HomeController::class, 'store'])->name('home.signup');
 Route::post('/process', [AuthController::class, 'process'])->name('login.process');

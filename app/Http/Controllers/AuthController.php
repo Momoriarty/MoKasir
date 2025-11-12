@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
-
 class AuthController extends Controller
 {
     public function showLogin()
@@ -32,7 +31,6 @@ class AuthController extends Controller
             ['username' => 'arifin', 'password' => 'anto', 'role' => 'admin'],
             ['username' => 'hapis', 'password' => 'jawa', 'role' => 'karyawan'],
         ];
-
         foreach ($data as $no => $user) {
             if ($request->username === $user['username'] && $request->password === $user['password']) {
 
@@ -60,14 +58,14 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
         ]);
 

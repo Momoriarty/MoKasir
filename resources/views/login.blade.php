@@ -14,7 +14,7 @@
     <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-30 animate-pulse"></div>
 
     <div class="relative z-10">
-      <h2 class="text-3xl font-bold text-center text-white mb-6">Login ke <span class="text-pink-400">SJC</span></h2>
+      <h2 class="text-3xl font-bold text-center text-white mb-6">Login ke <span class="text-pink-400">Pertamini Pusat</span></h2>
 
       @if (session('error'))
         <div class="bg-red-500/70 text-white text-center py-2 rounded-lg mb-4">
@@ -46,12 +46,12 @@
 
         <button type="submit"
                 class="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold rounded-lg shadow-md hover:shadow-xl hover:scale-105 transition-all duration-200">
-          Masuk Sekarang 🚀
+          login sekarang 🚀
         </button>
       </form>
 
       <p class="text-gray-400 text-center mt-6 text-sm">
-        © 2025 <span class="text-pink-400 font-semibold">SJC Career Center</span>
+        © 2025 <span class="text-pink-400 font-semibold">Pertamini Pusat</span>
       </p>
     </div>
   </div>

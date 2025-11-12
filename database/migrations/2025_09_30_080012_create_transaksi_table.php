@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('transaksis', function (Blueprint $table) {
             $table->id('id_transaksi');
             $table->dateTime('tanggal');
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('id')->constrained('users')->cascadeOnDelete();
             $table->decimal('total_bayar', 12, 2);
             $table->timestamps();
         });

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('transaksi_detail_penitipans', function (Blueprint $table) {
             $table->id('id_transaksi_detail_penitipan');
-            $table->foreignId('transaksi_id')->constrained('transaksi', 'id_transaksi')->cascadeOnDelete();
+            $table->foreignId('id_transaksi')->constrained('transaksi', 'id_transaksi')->cascadeOnDelete();
             $table->foreignId('penitipan_detail_id')->constrained('penitipan_detail', 'id_penitipan_detail')->cascadeOnDelete();
             $table->integer('jumlah');
             $table->decimal('harga_jual', 12, 2);

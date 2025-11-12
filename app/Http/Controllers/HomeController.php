@@ -19,9 +19,10 @@ class HomeController extends Controller
             return redirect()->route('signin');
         } elseif ($id == 'belanja') {
             return redirect()->away('https://www.tokopedia.com/');
-        } else {
+        } elseif ($id == 'home') {
             return redirect()->route('home.index')->with('info','Selamat datand di Home');
         }
+
 
     }
 

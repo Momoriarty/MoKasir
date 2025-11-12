@@ -5,7 +5,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Session;
 
 
 class AuthController extends Controller
@@ -37,7 +37,7 @@ class AuthController extends Controller
             ['username' => 'hapis', 'password' => 'jawa', 'role' => 'karyawan'],
         ];
 
-        foreach ($data as $user) {
+        foreach ($data as $no => $user) {
             if ($request->username === $user['username'] && $request->password === $user['password']) {
                 // kirim data user ke halaman admin
                 session(['user' => $user]);
@@ -56,16 +56,16 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|string|email',
-            'password' => 'required|string',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
-        // User::create([
-        //     'name' => $request->name,
-        //     'email' => $request->email,
-        //     'password' => Hash::make($request->password),
-        // ]);
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
         return redirect()->route('signin')->with('success', 'Registrasi berhasil, silakan login.');
     }

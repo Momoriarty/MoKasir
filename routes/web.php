@@ -11,6 +11,7 @@ use App\Http\Controllers\TransaksiDetailController;
 use App\Http\Controllers\TransaksiDetailPenitipanController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/dashboard', function () {

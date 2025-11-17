@@ -4,90 +4,239 @@
             {{ __('Barang') }}
         </h2>
     </x-slot>
+    <style>
+        /* Modal default */
+        .modal {
+            display: flex;
+            /* tetap flex biar JS jalan */
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            pointer-events: none;
+        }
+
+        /* Animasi masuk */
+        .modal[style*="display: flex"] {
+            animation: fadeIn 0.3s ease-out forwards;
+            pointer-events: auto;
+        }
+
+        /* Keyframes fade + scale + slide masuk */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Animasi keluar */
+        .modal[style*="display: flex"].closing {
+            animation: fadeOut 0.25s ease-in forwards;
+        }
+
+        /* Keyframes fade + scale + slide keluar */
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+        }
+    </style>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
 
-                <div class="flex justify-between mb-4">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang</h3>
-                    <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded">
-                        Tambah Barang
-                    </a>
+                    <button onclick="document.getElementById('modalTambah').style.display='flex'"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded">Tambah
+                        Barang</button>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
+                <!-- Tabel Barang -->
+                <div class="overflow-x-auto w-full">
+                    <table class="min-w-full divide-y divide-gray-600 dark:divide-gray-500 w-full">
+                        <thead class="bg-gray-800 dark:bg-gray-900">
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    ID</th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                     Nama Barang</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Kategori</th>
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Harga Modal (Kardus)</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Stok</th>
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Harga Modal (Ecer)</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    Harga</th>
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Harga Jual (Kardus)</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Harga Jual (Ecer)</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Isi per Kardus</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Stok Kardus</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Stok Ecer</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                     Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            <!-- Dummy Data Row 1 -->
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">1</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Laptop Acer</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Elektronik</td>
-                                <td class="px-6 py-4 whitespace-nowrap">10</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Rp 7.500.000</td>
-                                <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                    <a href="#"
-                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
-                                    <a href="#"
-                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</a>
-                                </td>
-                            </tr>
-                            <!-- Dummy Data Row 2 -->
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">2</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Meja Kayu</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Furniture</td>
-                                <td class="px-6 py-4 whitespace-nowrap">5</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Rp 1.200.000</td>
-                                <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                    <a href="#"
-                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
-                                    <a href="#"
-                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</a>
-                                </td>
-                            </tr>
-                            <!-- Dummy Data Row 3 -->
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">3</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Pulpen</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Alat Tulis</td>
-                                <td class="px-6 py-4 whitespace-nowrap">50</td>
-                                <td class="px-6 py-4 whitespace-nowrap">Rp 5.000</td>
-                                <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                    <a href="#"
-                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
-                                    <a href="#"
-                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</a>
-                                </td>
-                            </tr>
+                        <tbody
+                            class="bg-gray-700 dark:bg-gray-800 divide-y divide-gray-600 dark:divide-gray-700 text-white">
+                            @forelse ($barangs as $barang)
+                                <tr>
+                                    <td>{{ $barang->nama_barang }}</td>
+                                    <td>Rp {{ number_format($barang->harga_modal_kardus, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($barang->harga_modal_ecer, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($barang->harga_jual_kardus, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($barang->harga_jual_ecer, 0, ',', '.') }}</td>
+                                    <td>{{ $barang->isi_per_kardus }}</td>
+                                    <td>{{ $barang->stok_kardus }}</td>
+                                    <td>{{ $barang->stok_ecer }}</td>
+                                    <td class="space-x-2">
+                                        <button
+                                            onclick="document.getElementById('modalEdit-{{ $barang->id_barang }}').style.display='flex'"
+                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</button>
+                                        <button
+                                            onclick="document.getElementById('modalDelete-{{ $barang->id_barang }}').style.display='flex'"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</button>
+                                    </td>
+                                </tr>
+
+                                <!-- Modal Edit -->
+                                <div id="modalEdit-{{ $barang->id_barang }}"
+                                    class="modal fixed inset-0 z-50 flex items-center justify-center"
+                                    style="display:none; ">
+                                    <div
+                                        class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
+                                        <h3 class="text-2xl font-bold mb-6">Edit Barang</h3>
+                                        <form action="{{ route('barang.update', $barang->id_barang) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <input type="text" name="nama_barang"
+                                                    value="{{ $barang->nama_barang }}" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="harga_modal_kardus"
+                                                    value="{{ $barang->harga_modal_kardus }}" min="0" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="harga_modal_ecer"
+                                                    value="{{ $barang->harga_modal_ecer }}" min="0" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="harga_jual_kardus"
+                                                    value="{{ $barang->harga_jual_kardus }}" min="0" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="harga_jual_ecer"
+                                                    value="{{ $barang->harga_jual_ecer }}" min="0" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="isi_per_kardus"
+                                                    value="{{ $barang->isi_per_kardus }}" min="1" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="stok_kardus"
+                                                    value="{{ $barang->stok_kardus }}" min="0" required
+                                                    class="w-full px-4 py-2 border rounded-lg">
+                                                <input type="number" name="stok_ecer" value="{{ $barang->stok_ecer }}"
+                                                    min="0" required class="w-full px-4 py-2 border rounded-lg">
+                                            </div>
+                                            <div class="mt-6 flex justify-end gap-3">
+                                                <button type="button"
+                                                    onclick="document.getElementById('modalEdit-{{ $barang->id_barang }}').style.display='none'"
+                                                    class="px-4 py-2 rounded-lg bg-gray-300">Batal</button>
+                                                <button type="submit"
+                                                    class="px-4 py-2 rounded-lg bg-yellow-600 text-white">Update</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Delete -->
+                                <div id="modalDelete-{{ $barang->id_barang }}"
+                                    class="modal fixed inset-0 z-50 flex items-center justify-center"
+                                    style="display:none; ">
+                                    <div
+                                        class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
+                                        <h3 class="text-2xl font-bold mb-6">Hapus Barang</h3>
+                                        <p>Apakah yakin ingin menghapus <span
+                                                class="font-semibold">{{ $barang->nama_barang }}</span>?</p>
+                                        <form action="{{ route('barang.destroy', $barang->id_barang) }}" method="POST"
+                                            class="mt-4">
+                                            @csrf
+                                            @method('DELETE')
+                                            <div class="flex justify-end gap-3">
+                                                <button type="button"
+                                                    onclick="document.getElementById('modalDelete-{{ $barang->id_barang }}').style.display='none'"
+                                                    class="px-4 py-2 rounded-lg bg-gray-300">Batal</button>
+                                                <button type="submit"
+                                                    class="px-4 py-2 rounded-lg bg-red-600 text-white">Hapus</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            @empty
+                                <tr>
+                                    <td colspan="9" class="px-6 py-4 text-center text-gray-400">Data Barang Belum
+                                        Tersedia.</td>
+                                </tr>
+                            @endforelse
+
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
+
+        <!-- Modal Tambah -->
+        <div id="modalTambah" class="modal fixed inset-0 z-50 flex items-center justify-center"
+            style="display:none; ">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-8 border border-gray-200 dark:border-gray-700">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center sm:text-left">Tambah
+                    Barang Baru</h3>
+                <form action="{{ route('barang.store') }}" method="POST">
+                    @csrf
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input type="text" name="nama_barang" placeholder="Nama Barang" required
+                            class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="harga_modal_kardus" placeholder="Harga Modal (Kardus)"
+                            min="0" required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="harga_modal_ecer" placeholder="Harga Modal (Ecer)"
+                            min="0" required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="harga_jual_kardus" placeholder="Harga Jual (Kardus)"
+                            min="0" required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="harga_jual_ecer" placeholder="Harga Jual (Ecer)" min="0"
+                            required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="isi_per_kardus" placeholder="Isi per Kardus" min="1"
+                            required class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="stok_kardus" placeholder="Stok Kardus" min="0" required
+                            class="w-full px-4 py-2 border rounded-lg">
+                        <input type="number" name="stok_ecer" placeholder="Stok Ecer" min="0" required
+                            class="w-full px-4 py-2 border rounded-lg">
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" onclick="document.getElementById('modalTambah').style.display='none'"
+                            class="px-4 py-2 rounded-lg bg-gray-300">Batal</button>
+                        <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 </x-app-layout>

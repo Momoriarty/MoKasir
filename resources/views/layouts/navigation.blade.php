@@ -10,7 +10,6 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
                 @php
                     $menu = [
                         [
@@ -49,21 +48,21 @@
                     @foreach ($menu as $item)
                         @if (empty($item['sub']))
                             <!-- Single Link -->
-                            <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])" class="text-gray-200 hover:text-white">
+                            <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])"
+                                class="text-gray-900 dark:text-gray-200 hover:text-gray-700 dark:hover:text-white">
                                 {{ __($item['title']) }}
                             </x-nav-link>
                         @else
                             <!-- Dropdown -->
                             @php
-                                // Cek apakah salah satu sub-link aktif
                                 $isActive = collect($item['sub'])->contains(function ($sub) {
                                     return request()->routeIs($sub['route']);
                                 });
                             @endphp
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open"
-                                    :class="{ 'bg-gray-700 text-white': {{ $isActive ? 'true' : 'false' }} }"
-                                    class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:bg-gray-600 hover:text-white focus:outline-none">
+                                    :class="{ 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white': {{ $isActive ? 'true' : 'false' }} }"
+                                    class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-white focus:outline-none">
                                     {{ __($item['title']) }}
                                     <svg class="ml-1 h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,10 +71,10 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.away="open = false"
-                                    class="absolute bg-gray-800 text-gray-200 shadow-lg mt-2 rounded-md w-48 z-50 border border-gray-700">
+                                    class="absolute bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 shadow-lg mt-2 rounded-md w-48 z-50 border border-gray-200 dark:border-gray-700">
                                     @foreach ($item['sub'] as $sub)
                                         <x-nav-link
-                                            class="block px-4 py-2 rounded-md hover:bg-gray-700 hover:text-white"
+                                            class="block px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-white"
                                             :href="route($sub['route'])" :active="request()->routeIs($sub['route'])">
                                             {{ __($sub['title']) }}
                                         </x-nav-link>
@@ -87,10 +86,19 @@
 
                 </div>
 
+
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Settings Dropdown + Dark Mode Toggle -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-2">
+
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle"
+                    class="px-3 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none">
+                    Toggle Mode
+                </button>
+
+                <!-- User Dropdown -->
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -119,13 +127,14 @@
 
                             <x-dropdown-link :href="route('logout')"
                                 onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
                 </x-dropdown>
             </div>
+
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">

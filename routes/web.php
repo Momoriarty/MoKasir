@@ -46,10 +46,6 @@ Route::resource('/transaksi', TransaksiController::class);
 Route::resource('/transaksiDetail', TransaksiDetailController::class);
 Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController::class);
 
-// User Management
-Route::resource('/karyawan', KaryawanController::class);
-Route::resource('/admin', AdminController::class);
-
 
 
 require __DIR__ . '/auth.php';

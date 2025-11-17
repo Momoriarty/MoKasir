@@ -1,15 +1,17 @@
 <?php
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\BarangController;
+use App\Http\Controllers\BarangMasukController;
+use App\Http\Controllers\BarangRusakController;
+use App\Http\Controllers\PenitipanController;
+use App\Http\Controllers\PenitipanDetailController;
+use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\TransaksiDetailController;
+use App\Http\Controllers\TransaksiDetailPenitipanController;
 use App\Http\Controllers\KaryawanController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Route::get('/dashboard', function () {
     return view(view: 'dashboard');
@@ -29,11 +31,24 @@ Route::get('/go/{id}', action: [HomeController::class, 'RedirectTo'])->name('go'
 Route::post('/home/store', [HomeController::class, 'store'])->name('home.signup');
 Route::post('/process', [AuthController::class, 'process'])->name('login.process');
 
-Route::resource('/admin', AdminController::class);
-Route::resource('/karyawan', KaryawanController::class);
+// Barang
+Route::resource('/barang', BarangController::class);
+Route::resource('/barangMasuk', BarangMasukController::class);
+Route::resource('/barangRusak', BarangRusakController::class);
 
-// Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-// Route::post('/register', [AuthController::class, 'register']);
-// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Penitipan
+Route::resource('/penitipan', PenitipanController::class);
+Route::resource('/penitipanDetail', PenitipanDetailController::class);
+
+// Transaksi
+Route::resource('/transaksi', TransaksiController::class);
+Route::resource('/transaksiDetail', TransaksiDetailController::class);
+Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController::class);
+
+// User Management
+Route::resource('/karyawan', KaryawanController::class);
+Route::resource('/admin', AdminController::class);
+
+
 
 require __DIR__ . '/auth.php';

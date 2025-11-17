@@ -13,6 +13,8 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+
 
 Route::get('/dashboard', function () {
     return view(view: 'dashboard');
@@ -46,6 +48,9 @@ Route::resource('/transaksi', TransaksiController::class);
 Route::resource('/transaksiDetail', TransaksiDetailController::class);
 Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController::class);
 
+//Barang Masuk & Rusak
+Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
+Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
 
 
 require __DIR__ . '/auth.php';

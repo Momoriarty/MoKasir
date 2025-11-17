@@ -3,62 +3,51 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\BarangMasuk;
+use App\Models\Barang;
 
 class BarangMasukController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $barangMasuks = BarangMasuk::with('barang')->get();
+        $barangs = Barang::all();
+
+        return view('barang_masuk.index', compact('barangMasuks', 'barangs'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_barang' => 'required',
+            'jumlah_kardus' => 'required|integer|min:0',
+            'jumlah_ecer' => 'required|integer|min:0',
+            'tanggal_masuk' => 'required|date',
+        ]);
+
+        BarangMasuk::create($request->all());
+
+        return back()->with('success', 'Barang masuk berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, BarangMasuk $barang_masuk)
     {
-        //
+        $request->validate([
+            'id_barang' => 'required',
+            'jumlah_kardus' => 'required|integer|min:0',
+            'jumlah_ecer' => 'required|integer|min:0',
+            'tanggal_masuk' => 'required|date',
+        ]);
+
+        $barang_masuk->update($request->all());
+
+        return back()->with('success', 'Barang masuk berhasil diperbarui.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy(BarangMasuk $barang_masuk)
     {
-        //
-    }
+        $barang_masuk->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return back()->with('success', 'Barang masuk berhasil dihapus.');
     }
 }

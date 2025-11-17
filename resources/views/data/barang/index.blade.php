@@ -11,7 +11,7 @@
 
                 <div class="flex justify-between mb-4">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang</h3>
-                    <a href="{{ route('barang.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded">
+                    <a href="#" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded">
                         Tambah Barang
                     </a>
                 </div>
@@ -20,36 +20,69 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nama Barang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kategori</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stok</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Harga</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    ID</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Nama Barang</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Kategori</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Stok</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Harga</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($barangs as $barang)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $barang->id }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $barang->nama_barang }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $barang->kategori }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $barang->stok }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">Rp {{ number_format($barang->harga, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap space-x-2">
-                                        <a href="{{ route('barang.edit', $barang->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
-                                        <form action="{{ route('barang.destroy', $barang->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Yakin hapus barang ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Belum ada data barang.</td>
-                                </tr>
-                            @endforelse
+                            <!-- Dummy Data Row 1 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">1</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Laptop Acer</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Elektronik</td>
+                                <td class="px-6 py-4 whitespace-nowrap">10</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Rp 7.500.000</td>
+                                <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                                    <a href="#"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
+                                    <a href="#"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</a>
+                                </td>
+                            </tr>
+                            <!-- Dummy Data Row 2 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">2</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Meja Kayu</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Furniture</td>
+                                <td class="px-6 py-4 whitespace-nowrap">5</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Rp 1.200.000</td>
+                                <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                                    <a href="#"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
+                                    <a href="#"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</a>
+                                </td>
+                            </tr>
+                            <!-- Dummy Data Row 3 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">3</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Pulpen</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Alat Tulis</td>
+                                <td class="px-6 py-4 whitespace-nowrap">50</td>
+                                <td class="px-6 py-4 whitespace-nowrap">Rp 5.000</td>
+                                <td class="px-6 py-4 whitespace-nowrap space-x-2">
+                                    <a href="#"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded">Edit</a>
+                                    <a href="#"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">Hapus</a>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

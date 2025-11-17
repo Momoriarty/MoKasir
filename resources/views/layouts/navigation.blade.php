@@ -11,41 +11,80 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <!-- Dashboard -->
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                @php
+                    $menu = [
+                        [
+                            'title' => 'Dashboard',
+                            'route' => 'dashboard',
+                            'sub' => [],
+                        ],
+                        [
+                            'title' => 'Barang',
+                            'sub' => [
+                                ['title' => 'Barang', 'route' => 'barang.index'],
+                                ['title' => 'Barang Masuk', 'route' => 'barangMasuk.index'],
+                                ['title' => 'Barang Rusak', 'route' => 'barangRusak.index'],
+                            ],
+                        ],
+                        [
+                            'title' => 'Penitipan',
+                            'sub' => [
+                                ['title' => 'Penitipan', 'route' => 'penitipan.index'],
+                                ['title' => 'Detail Penitipan', 'route' => 'penitipanDetail.index'],
+                            ],
+                        ],
+                        [
+                            'title' => 'Transaksi',
+                            'sub' => [
+                                ['title' => 'Transaksi', 'route' => 'transaksi.index'],
+                                ['title' => 'Detail Transaksi', 'route' => 'transaksiDetail.index'],
+                                ['title' => 'Detail Transaksi Penitipan', 'route' => 'transaksiDetailPenitipan.index'],
+                            ],
+                        ],
+                    ];
+                @endphp
 
-                    <!-- Barang -->
-                    <x-nav-link :href="route('barang.index')" :active="request()->routeIs('barang.*')">
-                        {{ __('Barang') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('barangMasuk.index')" :active="request()->routeIs('barangMasuk.*')">
-                        {{ __('Barang Masuk') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('barangRusak.index')" :active="request()->routeIs('barangRusak.*')">
-                        {{ __('Barang Rusak') }}
-                    </x-nav-link>
+                <div class="hidden sm:flex sm:items-center sm:space-x-6 sm:ms-10">
 
-                    <!-- Penitipan -->
-                    <x-nav-link :href="route('penitipan.index')" :active="request()->routeIs('penitipan.*')">
-                        {{ __('Penitipan') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('penitipanDetail.index')" :active="request()->routeIs('penitipanDetail.*')">
-                        {{ __('Detail Penitipan') }}
-                    </x-nav-link>
+                    @foreach ($menu as $item)
+                        @if (empty($item['sub']))
+                            <!-- Single Link -->
+                            <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])" class="text-gray-200 hover:text-white">
+                                {{ __($item['title']) }}
+                            </x-nav-link>
+                        @else
+                            <!-- Dropdown -->
+                            @php
+                                // Cek apakah salah satu sub-link aktif
+                                $isActive = collect($item['sub'])->contains(function ($sub) {
+                                    return request()->routeIs($sub['route']);
+                                });
+                            @endphp
+                            <div x-data="{ open: false }" class="relative">
+                                <button @click="open = !open"
+                                    :class="{ 'bg-gray-700 text-white': {{ $isActive ? 'true' : 'false' }} }"
+                                    class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-200 hover:bg-gray-600 hover:text-white focus:outline-none">
+                                    {{ __($item['title']) }}
+                                    <svg class="ml-1 h-4 w-4 transition-transform" :class="{ 'rotate-180': open }"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" @click.away="open = false"
+                                    class="absolute bg-gray-800 text-gray-200 shadow-lg mt-2 rounded-md w-48 z-50 border border-gray-700">
+                                    @foreach ($item['sub'] as $sub)
+                                        <x-nav-link
+                                            class="block px-4 py-2 rounded-md hover:bg-gray-700 hover:text-white"
+                                            :href="route($sub['route'])" :active="request()->routeIs($sub['route'])">
+                                            {{ __($sub['title']) }}
+                                        </x-nav-link>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
 
-                    <!-- Transaksi -->
-                    <x-nav-link :href="route('transaksi.index')" :active="request()->routeIs('transaksi.*')">
-                        {{ __('Transaksi') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('transaksiDetail.index')" :active="request()->routeIs('transaksiDetail.*')">
-                        {{ __('Detail Transaksi') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('transaksiDetailPenitipan.index')" :active="request()->routeIs('transaksiDetailPenitipan.*')">
-                        {{ __('Detail Transaksi Penitipan') }}
-                    </x-nav-link>
                 </div>
 
             </div>

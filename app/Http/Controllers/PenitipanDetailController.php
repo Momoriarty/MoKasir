@@ -51,8 +51,7 @@ class PenitipanDetailController extends Controller
      */
     public function show(string $id)
     {
-        $data = PenitipanDetail::with('penitipan')->findOrFail($id);
-        return response()->json($data);
+        //
     }
 
     /**

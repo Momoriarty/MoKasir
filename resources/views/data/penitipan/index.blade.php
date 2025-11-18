@@ -93,7 +93,6 @@
                                                 <input type="date" name="tanggal_titip"
                                                     value="{{ $data->tanggal_titip }}" required
                                                     class="px-3 py-2 border rounded dark:bg-gray-700">
-
                                             </div>
 
                                             <div class="flex justify-end gap-3 mt-4">

@@ -45,8 +45,7 @@ class PenitipanController extends Controller
      */
     public function show(string $id)
     {
-        $penitipan = Penitipan::with('details')->findOrFail($id);
-        return view('data.penitipan_detail.index', compact('penitipan'));
+        //
     }
 
     /**

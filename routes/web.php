@@ -35,8 +35,20 @@ Route::middleware('auth')->group(function () {
     Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController::class);
 
 //Barang Masuk & Rusak
+<<<<<<< HEAD
+Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
+Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
+
+//
+Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
+Route::resource('barang-rusaks', BarangRusakController::class);
+Route::resource('barang-rusak', BarangRusakController::class);
+
+
+=======
     Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
     Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
 });
+>>>>>>> fde6c59ba9301da5248afd7988b43e23a5099e89
 
 require __DIR__ . '/auth.php';

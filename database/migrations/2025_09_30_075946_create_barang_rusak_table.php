@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+<<<<<<< HEAD
 public function up()
 {
     Schema::create('barang_rusaks', function (Blueprint $table) {
@@ -21,6 +22,20 @@ public function up()
     });
 }
 
+=======
+    public function up(): void
+    {
+        Schema::create('barang_rusaks', function (Blueprint $table) {
+            $table->id('id_barang_rusak');
+            $table->foreignId('id_barang')->constrained('barangs', 'id_barang')->cascadeOnDelete();
+            $table->integer('jumlah_kardus');
+            $table->integer('jumlah_ecer');
+            $table->string('keterangan', 200)->nullable();
+            $table->date('tanggal');
+            $table->timestamps();
+        });
+    }
+>>>>>>> fde6c59ba9301da5248afd7988b43e23a5099e89
 
     public function down(): void
     {

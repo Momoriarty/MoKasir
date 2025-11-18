@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Penitipan;
 use Illuminate\Http\Request;
 
 class PenitipanController extends Controller
@@ -11,7 +12,8 @@ class PenitipanController extends Controller
      */
     public function index()
     {
-        //
+        $penitipans = Penitipan::all();
+        return view('data.penitipan.index', compact('penitipans'));
     }
 
     /**
@@ -27,7 +29,15 @@ class PenitipanController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_penitip' => 'required|string|max:100',
+            'tanggal_titip' => 'required|date',
+        ]);
+
+        $data = Penitipan::create($request->all());
+
+        return back()->with('success', 'Penitipan berhasil ditambahkan.');
+
     }
 
     /**
@@ -35,7 +45,8 @@ class PenitipanController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $penitipan = Penitipan::with('details')->findOrFail($id);
+        return view('data.penitipan_detail.index', compact('penitipan'));
     }
 
     /**
@@ -51,7 +62,16 @@ class PenitipanController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'nama_penitip' => 'required|string|max:100',
+            'tanggal_titip' => 'required|date',
+        ]);
+
+        $data = Penitipan::findOrFail($id);
+        $data->update($request->all());
+
+        return back()->with('success', 'Penitipan berhasi di ubah.');
+
     }
 
     /**
@@ -59,6 +79,7 @@ class PenitipanController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        Penitipan::findOrFail($id)->delete();
+        return back()->with('success', 'Penitipan berhasil dihapus.');
     }
 }

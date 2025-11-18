@@ -12,11 +12,12 @@ class BarangRusakController extends Controller
     {
         $barangRusaks = BarangRusak::with('barang')->get();
         $barangs = Barang::all();
-        return view('barang_rusak.index', compact('barangRusaks', 'barangs'));
+        return view('data.barang_rusak.index', compact('barangRusaks', 'barangs'));
     }
 
     public function store(Request $request)
     {
+
         $request->validate([
             'id_barang' => 'required',
             'jumlah_kardus' => 'required|integer|min:0',

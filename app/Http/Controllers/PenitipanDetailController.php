@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PenitipanDetail;
+use App\Models\Penitipan;
 use Illuminate\Http\Request;
 
 class PenitipanDetailController extends Controller
@@ -11,7 +13,9 @@ class PenitipanDetailController extends Controller
      */
     public function index()
     {
-        //
+        $penitipanDetail = PenitipanDetail::with('penitipan')->get();
+        $penitipans = Penitipan::all();
+        return view('data.penitipan_detail.index', compact('penitipanDetail','penitipans'));
     }
 
     /**
@@ -27,7 +31,19 @@ class PenitipanDetailController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'id_penitipan' => 'required|exists:penitipans,id_penitipan',
+            'nama_barang' => 'required|string|max:100',
+            'harga_modal' => 'required|numeric|min:0',
+            'harga_jual' => 'required|numeric|min:0',
+            'jumlah_titip' => 'required|integer|min:1',
+            'jumlah_terjual' => 'nullable|integer|min:0',
+            'jumlah_sisa' => 'required|integer|min:0',
+        ]);
+
+        $data = PenitipanDetail::create($request->all());
+
+        return back()->with('success', 'Penitipan detail berhasil ditambahkan.');
     }
 
     /**
@@ -35,7 +51,8 @@ class PenitipanDetailController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $data = PenitipanDetail::with('penitipan')->findOrFail($id);
+        return response()->json($data);
     }
 
     /**
@@ -51,7 +68,20 @@ class PenitipanDetailController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'id_penitipan' => 'required|exists:penitipans,id_penitipan',
+            'nama_barang' => 'required|string|max:100',
+            'harga_modal' => 'required|numeric|min:0',
+            'harga_jual' => 'required|numeric|min:0',
+            'jumlah_titip' => 'required|integer|min:1',
+            'jumlah_terjual' => 'nullable|integer|min:0',
+            'jumlah_sisa' => 'required|integer|min:0',
+        ]);
+
+        $data = PenitipanDetail::findOrFail($id);
+        $data->update($request->all());
+
+        return back()->with('success', 'Penitipan detail berhasil diPerbarui.');
     }
 
     /**
@@ -59,6 +89,7 @@ class PenitipanDetailController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        PenitipanDetail::findOrFail($id)->delete();
+        return back()->with('success', 'Penitipan berhasil ditambahkan.');
     }
 }

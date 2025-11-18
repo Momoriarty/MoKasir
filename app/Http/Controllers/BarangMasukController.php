@@ -13,7 +13,7 @@ class BarangMasukController extends Controller
         $barangMasuks = BarangMasuk::with('barang')->get();
         $barangs = Barang::all();
 
-        return view('barang_masuk.index', compact('barangMasuks', 'barangs'));
+        return view('data.barang_masuk.index', compact('barangMasuks', 'barangs'));
     }
 
     public function store(Request $request)

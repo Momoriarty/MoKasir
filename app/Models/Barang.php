@@ -10,7 +10,6 @@ class Barang extends Model
     use HasFactory;
 
     protected $table = 'barangs';
-
     protected $primaryKey = 'id_barang';
 
     protected $fillable = [
@@ -24,4 +23,9 @@ class Barang extends Model
         'stok_kardus',
         'stok_ecer',
     ];
+
+    public function barangRusak()
+    {
+        return $this->hasMany(BarangRusak::class, 'id_barang', 'id_barang');
+    }
 }

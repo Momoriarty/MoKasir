@@ -52,5 +52,11 @@ Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController:
 Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
 Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
 
+//
+Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
+Route::resource('barang-rusaks', BarangRusakController::class);
+Route::resource('barang-rusak', BarangRusakController::class);
+
+
 
 require __DIR__ . '/auth.php';

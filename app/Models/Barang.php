@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +8,7 @@ class Barang extends Model
 {
     use HasFactory;
 
-    protected $table = 'barangs';
+    protected $table      = 'barangs';
     protected $primaryKey = 'id_barang';
 
     protected $fillable = [
@@ -28,4 +27,10 @@ class Barang extends Model
     {
         return $this->hasMany(BarangRusak::class, 'id_barang', 'id_barang');
     }
+
+    public function transaksiDetails()
+    {
+        return $this->hasMany(TransaksiDetail::class, 'barang_id', 'id_barang');
+    }
+
 }

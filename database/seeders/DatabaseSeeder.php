@@ -13,5 +13,11 @@ class DatabaseSeeder extends Seeder
             BarangSeeder::class,
             BarangMasukSeeder::class,
             BarangRusakSeeder::class,]);
+            PenitipanSeeder::class,
+            PenitipanDetailSeeder::class
+
+            BarangSeeder::class,
+            TransaksiSeeder::class,
+        ]);
     }
 }

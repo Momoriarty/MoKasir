@@ -6,23 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-<<<<<<< HEAD
-public function up()
-{
-    Schema::create('barang_rusaks', function (Blueprint $table) {
-        $table->id('id_barang_rusak');
-        $table->unsignedBigInteger('id_barang');
-        $table->integer('jumlah_kardus')->default(0);
-        $table->integer('jumlah_ecer')->default(0);
-        $table->string('keterangan')->nullable();
-        $table->date('tanggal_rusak');
-        $table->timestamps();
-
-        $table->foreign('id_barang')->references('id_barang')->on('barangs')->onDelete('cascade');
-    });
-}
-
-=======
     public function up(): void
     {
         Schema::create('barang_rusaks', function (Blueprint $table) {
@@ -35,7 +18,6 @@ public function up()
             $table->timestamps();
         });
     }
->>>>>>> fde6c59ba9301da5248afd7988b43e23a5099e89
 
     public function down(): void
     {

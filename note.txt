@@ -1,0 +1,4 @@
+- input barang sesuai id barang tpi yang ditampilkan nama barang
+- input total di beli kardus dan ecer
+- input barang di titip di beli
+- input otomatis shift karyawan

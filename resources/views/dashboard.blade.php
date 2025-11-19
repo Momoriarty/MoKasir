@@ -281,10 +281,10 @@
         bayarInput.addEventListener("input", (e) => {
             if (metodeBayar.value === "qris") return; // tidak bisa ubah jika QRIS
             let value = e.target.value.replace(/\D/g, ""); // hapus semua selain angka
-            if (!value) value = "0";
-            e.target.value = parseInt(value).toLocaleString("id-ID"); // format rupiah
+            e.target.value = value; // jangan format di input, biar tidak reset
             updateTotal();
         });
+
 
         // ======================
         // Ganti metode bayar

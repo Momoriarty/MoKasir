@@ -13,6 +13,7 @@ return new class extends Migration
             $table->dateTime('tanggal');
             $table->foreignId('id')->constrained('users')->cascadeOnDelete();
             $table->decimal('total_bayar', 12, 2);
+            $table->enum('metode', ['Tunai', 'Qris']);
             $table->timestamps();
         });
     }

@@ -28,7 +28,7 @@
                                     No</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
-                                    Nama Pengguna</th>
+                                    Nama Kasir</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
                                     Total Bayar</th>

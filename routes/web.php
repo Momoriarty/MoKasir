@@ -3,6 +3,7 @@
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\BarangMasukController;
 use App\Http\Controllers\BarangRusakController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipanController;
 use App\Http\Controllers\PenitipanDetailController;
 use App\Http\Controllers\ProfileController;
@@ -11,9 +12,9 @@ use App\Http\Controllers\TransaksiDetailController;
 use App\Http\Controllers\TransaksiDetailPenitipanController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dashboard', function () {
-    return view(view: 'dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 route::get('/', function () {
     return view('welcome');

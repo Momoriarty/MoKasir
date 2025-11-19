@@ -15,6 +15,9 @@ Route::get('/dashboard', function () {
     return view(view: 'dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+route::get('/', function () {
+    return view('welcome');
+});
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -34,10 +37,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('/transaksiDetail', TransaksiDetailController::class);
     Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController::class);
 
-// Barang Masuk & Rusak
-Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
-Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
-
+//Barang Masuk & Rusak
+    Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
+    Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
 });
 
 require __DIR__ . '/auth.php';

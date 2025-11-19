@@ -4,53 +4,7 @@
             {{ __('Barang') }}
         </h2>
     </x-slot>
-    <style>
-        /* Modal default */
-        .modal {
-            display: flex;
-            /* tetap flex biar JS jalan */
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-            pointer-events: none;
-        }
 
-        /* Animasi masuk */
-        .modal[style*="display: flex"] {
-            animation: fadeIn 0.3s ease-out forwards;
-            pointer-events: auto;
-        }
-
-        /* Keyframes fade + scale + slide masuk */
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Animasi keluar */
-        .modal[style*="display: flex"].closing {
-            animation: fadeOut 0.25s ease-in forwards;
-        }
-
-        /* Keyframes fade + scale + slide keluar */
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95);
-            }
-        }
-    </style>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">

@@ -5,33 +5,6 @@
         </h2>
     </x-slot>
 
-    {{-- Modal Style Copy dari halaman barang --}}
-    <style>
-        .modal {
-            display: flex;
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-            pointer-events: none;
-        }
-
-        .modal[style*="display: flex"] {
-            animation: fadeIn 0.3s forwards;
-            pointer-events: auto;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1)
-            }
-        }
-    </style>
-
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
@@ -50,12 +23,24 @@
                     <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                         <thead class="bg-gray-200 dark:bg-gray-900">
                             <tr>
-                                <th class="px-4 py-2 text-left">Barang</th>
-                                <th class="px-4 py-2 text-left">Jumlah Kardus</th>
-                                <th class="px-4 py-2 text-left">Jumlah Ecer</th>
-                                <th class="px-4 py-2 text-left">Keterangan</th>
-                                <th class="px-4 py-2 text-left">Tanggal Rusak</th>
-                                <th class="px-4 py-2 text-left">Aksi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Barang</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Kardus</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Ecer</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Keterangan</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Tanggal Rusak</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
 
@@ -70,12 +55,14 @@
                                     <td class="px-4 py-2">{{ $rusak->tanggal_rusak }}</td>
 
                                     <td class="px-4 py-2 space-x-2">
-                                        <button onclick="document.getElementById('modalEditRusak-{{ $rusak->id_barang_rusak }}').style.display='flex'"
+                                        <button
+                                            onclick="document.getElementById('modalEditRusak-{{ $rusak->id_barang_rusak }}').style.display='flex'"
                                             class="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600">
                                             Edit
                                         </button>
 
-                                        <button onclick="document.getElementById('modalDeleteRusak-{{ $rusak->id_barang_rusak }}').style.display='flex'"
+                                        <button
+                                            onclick="document.getElementById('modalDeleteRusak-{{ $rusak->id_barang_rusak }}').style.display='flex'"
                                             class="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
                                             Hapus
                                         </button>

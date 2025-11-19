@@ -5,32 +5,6 @@
         </h2>
     </x-slot>
 
-    <style>
-        .modal {
-            display: flex;
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-            pointer-events: none;
-        }
-
-        .modal[style*="display: flex"] {
-            animation: fadeIn 0.3s forwards;
-            pointer-events: auto;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1)
-            }
-        }
-    </style>
-
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
@@ -51,14 +25,30 @@
                     <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                         <thead class="bg-gray-200 dark:bg-gray-900">
                             <tr>
-                                <th class="px-4 py-2">Nama penitip</th>
-                                <th class="px-4 py-2">Nama Barang</th>
-                                <th class="px-4 py-2">Harga Modal</th>
-                                <th class="px-4 py-2">Harga Jual</th>
-                                <th class="px-4 py-2">Jumlah Titip</th>
-                                <th class="px-4 py-2">Jumlah Terjual</th>
-                                <th class="px-4 py-2">Jumlah Sisa</th>
-                                <th class="px-4 py-2">Aksi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Nama penitip</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Nama Barang</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Harga Modal</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Harga Jual</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Titip</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Terjual</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Sisa</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
 

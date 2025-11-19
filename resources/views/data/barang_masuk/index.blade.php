@@ -5,49 +5,6 @@
         </h2>
     </x-slot>
 
-    {{-- Style Modal (sama seperti halaman barang) --}}
-    <style>
-        .modal {
-            display: flex;
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-            pointer-events: none;
-        }
-
-        .modal[style*="display: flex"] {
-            animation: fadeIn 0.3s ease-out forwards;
-            pointer-events: auto;
-        }
-
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .modal[style*="display: flex"].closing {
-            animation: fadeOut 0.25s ease-in forwards;
-        }
-
-        @keyframes fadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translateY(-10px) scale(0.95);
-            }
-        }
-    </style>
-
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
@@ -68,11 +25,21 @@
                     <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                         <thead class="bg-gray-200 dark:bg-gray-900">
                             <tr>
-                                <th class="px-4 py-2 text-xs font-semibold text-left">Barang</th>
-                                <th class="px-4 py-2 text-xs font-semibold text-left">Jumlah Kardus</th>
-                                <th class="px-4 py-2 text-xs font-semibold text-left">Jumlah Ecer</th>
-                                <th class="px-4 py-2 text-xs font-semibold text-left">Tanggal Masuk</th>
-                                <th class="px-4 py-2 text-xs font-semibold text-left">Aksi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Barang</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Kardus</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Jumlah Ecer</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Tanggal Masuk</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-gray-100 divide-y dark:bg-gray-800 dark:divide-gray-700">
@@ -86,12 +53,14 @@
                                     <td class="px-4 py-2">{{ $masuk->tanggal_masuk }}</td>
 
                                     <td class="px-4 py-2 space-x-2">
-                                        <button onclick="document.getElementById('modalEditMasuk-{{ $masuk->id_barang_masuk }}').style.display='flex'"
+                                        <button
+                                            onclick="document.getElementById('modalEditMasuk-{{ $masuk->id_barang_masuk }}').style.display='flex'"
                                             class="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600">
                                             Edit
                                         </button>
 
-                                        <button onclick="document.getElementById('modalDeleteMasuk-{{ $masuk->id_barang_masuk }}').style.display='flex'"
+                                        <button
+                                            onclick="document.getElementById('modalDeleteMasuk-{{ $masuk->id_barang_masuk }}').style.display='flex'"
                                             class="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
                                             Hapus
                                         </button>

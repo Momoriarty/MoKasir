@@ -77,7 +77,7 @@
 
                                         <h3 class="mb-4 text-xl font-bold dark:text-gray-100">Edit Barang Rusak</h3>
 
-                                        <form action="{{ route('barang-rusaks.update', $rusak->id_barang_rusak) }}"
+                                        <form action="{{ route('barangRusak.update', $rusak->id_barang_rusak) }}"
                                             method="POST">
                                             @csrf
                                             @method('PUT')
@@ -133,7 +133,7 @@
                                         <h3 class="mb-4 text-xl font-bold dark:text-gray-100">Hapus Barang Rusak</h3>
                                         <p class="mb-4 dark:text-gray-100">Yakin ingin menghapus data ini?</p>
 
-                                        <form action="{{ route('barang-rusaks.destroy', $rusak->id_barang_rusak) }}"
+                                        <form action="{{ route('barangRusak.destroy', $rusak->id_barang_rusak) }}"
                                             method="POST">
                                             @csrf
                                             @method('DELETE')
@@ -176,7 +176,7 @@
 
             <h3 class="mb-4 text-xl font-bold dark:text-gray-100">Tambah Barang Rusak</h3>
 
-            <form action="{{ route('barang-rusaks.store') }}" method="POST">
+            <form action="{{ route('barangRusak.store') }}" method="POST">
                 @csrf
 
                 <div class="grid grid-cols-1 gap-3">

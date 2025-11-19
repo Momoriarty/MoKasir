@@ -12,10 +12,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             BarangSeeder::class,
             BarangMasukSeeder::class,
-            BarangRusakSeeder::class,]);
+            BarangRusakSeeder::class,
             PenitipanSeeder::class,
-            PenitipanDetailSeeder::class
-
+            PenitipanDetailSeeder::class,
             TransaksiSeeder::class,
         ]);
     }

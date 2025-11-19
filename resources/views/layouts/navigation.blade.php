@@ -37,7 +37,7 @@
                             'sub' => [
                                 ['title' => 'Transaksi', 'route' => 'transaksi.index'],
                                 ['title' => 'Detail Transaksi', 'route' => 'transaksiDetail.index'],
-                                ['title' => 'Detail Transaksi Penitipan', 'route' => 'transaksiDetailPenitipan.index'],
+                                // ['title' => 'Detail Transaksi Penitipan', 'route' => 'transaksiDetailPenitipan.index'],
                             ],
                         ],
                     ];

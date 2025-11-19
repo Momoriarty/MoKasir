@@ -18,7 +18,8 @@ Route::get('/dashboard', function () {
 route::get('/', function () {
     return view('welcome');
 });
-Route::middleware('auth')->group(function () {
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -36,10 +37,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('/transaksi', TransaksiController::class);
     Route::resource('/transaksiDetail', TransaksiDetailController::class);
     Route::resource('/transaksiDetailPenitipan', TransaksiDetailPenitipanController::class);
-
-//Barang Masuk & Rusak
-    Route::resource('barang-masuks', App\Http\Controllers\BarangMasukController::class);
-    Route::resource('barang-rusaks', App\Http\Controllers\BarangRusakController::class);
 });
 
 require __DIR__ . '/auth.php';

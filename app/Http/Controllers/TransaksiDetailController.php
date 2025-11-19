@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\TransaksiDetail;
 
 class TransaksiDetailController extends Controller
 {
@@ -11,7 +11,10 @@ class TransaksiDetailController extends Controller
      */
     public function index()
     {
-        //
+        // Ambil semua transaksi detail beserta relasinya
+        $details = TransaksiDetail::with(['transaksi', 'barang'])->get();
+
+        return view('data.transaksi_detail.index', compact('details'));
     }
 
     /**

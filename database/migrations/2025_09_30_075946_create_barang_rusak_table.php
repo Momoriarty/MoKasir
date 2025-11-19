@@ -14,7 +14,7 @@ return new class extends Migration
             $table->integer('jumlah_kardus');
             $table->integer('jumlah_ecer');
             $table->string('keterangan', 200)->nullable();
-            $table->date('tanggal');
+            $table->date('tanggal_rusak');
             $table->timestamps();
         });
     }

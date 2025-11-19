@@ -119,9 +119,20 @@
                             </div>
                         </div>
 
+                        <!-- METODE PEMBAYARAN -->
+                        <div
+                            class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border dark:border-gray-600 space-y-4 transition-colors duration-300 mt-3">
+                            <label class="font-semibold text-gray-700 dark:text-gray-200">Metode Pembayaran</label>
+                            <select id="metode-bayar"
+                                class="mt-1 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white w-full p-3 transition-colors duration-300">
+                                <option value="tunai">Tunai</option>
+                                <option value="qris">QRIS</option>
+                            </select>
+                        </div>
+
                         <!-- BAYAR PANEL -->
                         <div
-                            class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border dark:border-gray-600 space-y-4 transition-colors duration-300">
+                            class="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl border dark:border-gray-600 space-y-4 transition-colors duration-300 mt-3">
                             <div>
                                 <label class="font-semibold text-gray-700 dark:text-gray-200">Bayar</label>
                                 <input type="number" name="bayar"
@@ -167,9 +178,31 @@
         const bayarDisplayHeader = document.getElementById("bayar-display");
         const kembaliDisplayHeader = document.getElementById("kembali-display");
 
+        const selectBarang = document.querySelector('select[name="id_barang"]');
+        const jumlahKardusInput = document.querySelector('input[name="jumlah_kardus"]');
+        const jumlahEcerInput = document.querySelector('input[name="jumlah_ecer"]');
         const bayarInput = document.querySelector('input[name="bayar"]');
         const kembaliDisplayFooter = document.getElementById("kembali-display2");
+        const metodeBayar = document.getElementById("metode-bayar");
 
+        // ======================
+        // Disable input ecer jika harga ecer = 0
+        // ======================
+        selectBarang.addEventListener("change", () => {
+            const hargaE = parseInt(selectBarang.selectedOptions[0].dataset.hargaEcer);
+            if (hargaE === 0) {
+                jumlahEcerInput.value = 0;
+                jumlahEcerInput.disabled = true;
+                jumlahEcerInput.classList.add('bg-gray-200', 'cursor-not-allowed');
+            } else {
+                jumlahEcerInput.disabled = false;
+                jumlahEcerInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+            }
+        });
+
+        // ======================
+        // Update total dan kembalian
+        // ======================
         function updateTotal() {
             let subtotal = 0;
 
@@ -178,7 +211,13 @@
                 subtotal += parseInt(nilai) || 0;
             });
 
-            const bayar = parseInt(bayarInput.value) || 0;
+            let bayar = parseInt(bayarInput.value.replace(/\./g, "")) || 0;
+
+            // Jika metode QRIS, bayar otomatis = total
+            if (metodeBayar.value === "qris") {
+                bayar = subtotal;
+            }
+
             const kembali = bayar - subtotal;
 
             totalDisplayHeader.innerText = formatAngka(subtotal);
@@ -187,14 +226,15 @@
             kembaliDisplayFooter.value = formatAngka(kembali >= 0 ? kembali : 0);
         }
 
+        // ======================
+        // Tambah ke keranjang
+        // ======================
         btnTambah.addEventListener("click", () => {
-            const selectBarang = document.querySelector('select[name="id_barang"]');
-            const jumlahKardus = parseInt(document.querySelector('input[name="jumlah_kardus"]').value) || 0;
-            const jumlahEcer = parseInt(document.querySelector('input[name="jumlah_ecer"]').value) || 0;
-
             if (!selectBarang.value) return alert("Pilih barang dulu!");
 
             const nama = selectBarang.options[selectBarang.selectedIndex].text;
+            const jumlahKardus = parseInt(jumlahKardusInput.value) || 0;
+            const jumlahEcer = parseInt(jumlahEcerInput.value) || 0;
             const hargaK = parseInt(selectBarang.selectedOptions[0].dataset.hargaKardus);
             const hargaE = parseInt(selectBarang.selectedOptions[0].dataset.hargaEcer);
             const total = jumlahKardus * hargaK + jumlahEcer * hargaE;
@@ -202,21 +242,32 @@
             const tr = document.createElement("tr");
             tr.classList.add("transition-colors", "duration-300");
             tr.innerHTML = `
-            <td class="px-6 py-2">${nama}</td>
-            <td class="px-6 py-2">${jumlahKardus}</td>
-            <td class="px-6 py-2">${jumlahEcer}</td>
-            <td class="px-6 py-2">${formatAngka(hargaK)}</td>
-            <td class="px-6 py-2">${formatAngka(hargaE)}</td>
-            <td class="px-6 py-2">${formatAngka(total)}</td>
-            <td class="px-6 py-2">
-                <button class="hapus bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors duration-300">Hapus</button>
-            </td>
-        `;
+        <td class="px-6 py-2">${nama}</td>
+        <td class="px-6 py-2">${jumlahKardus}</td>
+        <td class="px-6 py-2">${jumlahEcer}</td>
+        <td class="px-6 py-2">${formatAngka(hargaK)}</td>
+        <td class="px-6 py-2">${formatAngka(hargaE)}</td>
+        <td class="px-6 py-2">${formatAngka(total)}</td>
+        <td class="px-6 py-2">
+            <button class="hapus bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors duration-300">Hapus</button>
+        </td>
+    `;
             tbody.appendChild(tr);
             updateTotal();
+
+            // ======================
+            // Reset form setelah tambah
+            // ======================
+            selectBarang.value = "";
+            jumlahKardusInput.value = "";
+            jumlahEcerInput.value = "";
+            jumlahEcerInput.disabled = false;
+            jumlahEcerInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
         });
 
+        // ======================
         // Hapus barang
+        // ======================
         tbody.addEventListener("click", (e) => {
             if (e.target.classList.contains("hapus")) {
                 e.target.closest("tr").remove();
@@ -224,21 +275,30 @@
             }
         });
 
-        bayarInput.addEventListener("input", updateTotal);
+        // ======================
+        // Auto format input bayar
+        // ======================
+        bayarInput.addEventListener("input", (e) => {
+            if (metodeBayar.value === "qris") return; // tidak bisa ubah jika QRIS
+            let value = e.target.value.replace(/\D/g, ""); // hapus semua selain angka
+            if (!value) value = "0";
+            e.target.value = parseInt(value).toLocaleString("id-ID"); // format rupiah
+            updateTotal();
+        });
 
-        // Untuk toggle dark mode dinamis
-        function applyDarkMode() {
-            const dark = document.documentElement.classList.contains('dark');
-            document.querySelectorAll('input, select, textarea').forEach(el => {
-                if (dark) {
-                    el.classList.add('dark:bg-gray-900', 'dark:border-gray-700', 'dark:text-white');
-                } else {
-                    el.classList.remove('dark:bg-gray-900', 'dark:border-gray-700', 'dark:text-white');
-                }
-            });
-        }
-
-        // Jalankan saat load
-        applyDarkMode();
+        // ======================
+        // Ganti metode bayar
+        // ======================
+        metodeBayar.addEventListener("change", () => {
+            if (metodeBayar.value === "qris") {
+                bayarInput.value = totalDisplayHeader.innerText;
+                bayarInput.disabled = true;
+                bayarInput.classList.add('bg-gray-200', 'cursor-not-allowed');
+            } else {
+                bayarInput.disabled = false;
+                bayarInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+            }
+            updateTotal();
+        });
     </script>
 </x-app-layout>

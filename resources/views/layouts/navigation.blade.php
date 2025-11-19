@@ -37,15 +37,22 @@
                             'sub' => [
                                 ['title' => 'Transaksi', 'route' => 'transaksi.index'],
                                 ['title' => 'Detail Transaksi', 'route' => 'transaksiDetail.index'],
-                                // ['title' => 'Detail Transaksi Penitipan', 'route' => 'transaksiDetailPenitipan.index'],
+                                ['title' => 'Detail Transaksi Penitipan', 'route' => 'transaksiDetailPenitipan.index'],
                             ],
                         ],
                     ];
                 @endphp
-
+                @php
+                    $role = auth()->user()->role;
+                @endphp
                 <div class="hidden sm:flex sm:items-center sm:space-x-6 sm:ms-10">
 
                     @foreach ($menu as $item)
+                        @if ($role === 'karyawan' && $item['title'] !== 'Dashboard')
+                            @continue
+                        @endif
+
+
                         @if (empty($item['sub']))
                             <!-- Single Link -->
                             <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['route'])"
@@ -104,7 +111,7 @@
                         <button
                             class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
                             <div>{{ auth()->user()->name ?? 'Guest' }}
-</div>
+                            </div>
 
                             <div class="ms-1">
                                 <svg class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg"
@@ -164,10 +171,11 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="px-4">
-                <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ auth()->user()->name ?? 'Guest' }}
-</div>
+                <div class="text-base font-medium text-gray-800 dark:text-gray-200">
+                    {{ auth()->user()->name ?? 'Guest' }}
+                </div>
                 <div class="text-sm font-medium text-gray-500">{{ auth()->user()->name ?? 'Guest' }}
-</div>
+                </div>
             </div>
 
             <div class="mt-3 space-y-1">

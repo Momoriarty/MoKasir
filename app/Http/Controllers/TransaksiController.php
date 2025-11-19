@@ -1,8 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class TransaksiController extends Controller
 {
@@ -11,7 +13,9 @@ class TransaksiController extends Controller
      */
     public function index()
     {
-        //
+        $transaksis = Transaksi::all();
+        $users      = User::all();
+        return view('data.transaksi.index', compact('transaksis', 'users'));
     }
 
     /**

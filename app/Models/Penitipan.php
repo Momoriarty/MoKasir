@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\PenitipanDetail;
 use Illuminate\Database\Eloquent\Model;
 
 class Penitipan extends Model

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QRIS Dinamis dari Foto Statis</title>
+
+    ```
+    <!-- library decode QR -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+    <!-- generate QR -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+
+        .box {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+    ```
+
+</head>
+
+<body>
+
+    ```
+    <h2>QRIS Statis ➜ QRIS Dinamis (Ambil dari qris.jpeg)</h2>
+
+    <div class="box">
+        <label>Total Bayar (Rp):</label><br>
+        <input type="number" id="nominal" placeholder="contoh: 15000">
+    </div>
+
+    <button id="proses">Generate QRIS Dinamis</button>
+
+    <h3>QRIS Dinamis:</h3>
+    <canvas id="qrDyn"></canvas>
+
+    <script>
+        function crc16_ccitt(str) {
+            let crc = 0xFFFF;
+            for (let c of str) {
+                crc ^= c.charCodeAt(0) << 8;
+                for (let i = 0; i < 8; i++) {
+                    if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
+                    else crc <<= 1;
+                    crc &= 0xFFFF;
+                }
+            }
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        document.getElementById("proses").onclick = () => {
+            let nominal = document.getElementById("nominal").value;
+            if (!nominal) return alert("Isi nominal total bayar!");
+
+            let img = new Image();
+            img.crossOrigin = "anonymous"; // penting untuk mencegah tainted canvas
+            img.src = "qris.jpeg"; // lokasi file
+
+            img.onload = () => {
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext("2d");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                let raw = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let qr = jsQR(raw.data, canvas.width, canvas.height);
+
+                if (!qr) return alert("QR tidak terdeteksi dalam qris.jpeg!");
+
+                let payload = qr.data;
+                payload = payload.replace(/54\d{2}\d+/g, "");
+                payload = payload.replace(/6304([0-9A-Fa-f]{4})$/, "");
+
+                let nominalStr = String(nominal);
+                let length = nominalStr.length.toString().padStart(2, "0");
+                let tag54 = `54${length}${nominalStr}`;
+
+                let payloadNoCRC = payload + tag54 + "6304";
+                let crc = crc16_ccitt(payloadNoCRC);
+                let finalPayload = payloadNoCRC + crc;
+
+                QRCode.toCanvas(document.getElementById("qrDyn"), finalPayload, { width: 300 });
+                alert("QRIS Dinamis berhasil dibuat!");
+            };
+        };
+    </script>
+    ```
+
+</body>
+
+</html>

@@ -25,10 +25,18 @@ class BarangMasukController extends Controller
             'tanggal_masuk' => 'required|date',
         ]);
 
-        BarangMasuk::create($request->all());
+        $barangMasuk = BarangMasuk::create($request->all());
 
-        return back()->with('success', 'Barang masuk berhasil ditambahkan.');
+        $barang = Barang::find($request->id_barang);
+        if ($barang) {
+            $barang->stok_kardus += $request->jumlah_kardus;
+            $barang->stok_ecer += $request->jumlah_ecer;
+            $barang->save();
+        }
+
+        return back()->with('success', 'Barang masuk berhasil ditambahkan dan stok diperbarui.');
     }
+
 
     public function update(Request $request, BarangMasuk $barang_masuk)
     {
@@ -39,15 +47,45 @@ class BarangMasukController extends Controller
             'tanggal_masuk' => 'required|date',
         ]);
 
+        // Ambil barang terkait
+        $barang = Barang::find($request->id_barang);
+        if ($barang) {
+            // Hitung selisih stok
+            $selisihKardus = $request->jumlah_kardus - $barang_masuk->jumlah_kardus;
+            $selisihEcer = $request->jumlah_ecer - $barang_masuk->jumlah_ecer;
+
+            $barang->stok_kardus += $selisihKardus;
+            $barang->stok_ecer += $selisihEcer;
+            $barang->save();
+        }
+
+        // Update record barang_masuks
         $barang_masuk->update($request->all());
 
-        return back()->with('success', 'Barang masuk berhasil diperbarui.');
+        return back()->with('success', 'Barang masuk berhasil diperbarui dan stok disesuaikan.');
     }
+
 
     public function destroy(BarangMasuk $barang_masuk)
     {
+        // Ambil barang terkait
+        $barang = Barang::find($barang_masuk->id_barang);
+        if ($barang) {
+            // Kurangi stok sesuai jumlah barang masuk yang dihapus
+            $barang->stok_kardus -= $barang_masuk->jumlah_kardus;
+            $barang->stok_ecer -= $barang_masuk->jumlah_ecer;
+
+            // Pastikan stok tidak negatif
+            $barang->stok_kardus = max($barang->stok_kardus, 0);
+            $barang->stok_ecer = max($barang->stok_ecer, 0);
+
+            $barang->save();
+        }
+
+        // Hapus record barang_masuks
         $barang_masuk->delete();
 
-        return back()->with('success', 'Barang masuk berhasil dihapus.');
+        return back()->with('success', 'Barang masuk berhasil dihapus dan stok diperbarui.');
     }
+
 }

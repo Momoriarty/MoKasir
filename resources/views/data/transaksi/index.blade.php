@@ -157,11 +157,11 @@
 
                                             <div class="grid grid-cols-1 gap-4">
                                                 <!-- User -->
-                                                <select name="user_id" required
+                                                <select name="id_user" required
                                                     class="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700">
                                                     @foreach ($users as $u)
                                                         <option value="{{ $u->id }}"
-                                                            {{ $t->user_id == $u->id ? 'selected' : '' }}>
+                                                            {{ $t->id_user == $u->id ? 'selected' : '' }}>
                                                             {{ $u->name }}
                                                         </option>
                                                     @endforeach
@@ -244,7 +244,7 @@
 
                     <div class="grid grid-cols-1 gap-4">
                         <!-- User -->
-                        <select name="user_id" required
+                        <select name="id_user" required
                             class="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700">
                             <option value="">-- Pilih Pengguna --</option>
                             @foreach ($users as $u)

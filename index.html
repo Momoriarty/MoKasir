@@ -1,103 +1,320 @@
 <!DOCTYPE html>
-
-<html lang="id">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>QRIS Dinamis dari Foto Statis</title>
-
-    ```
-    <!-- library decode QR -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-
-    <!-- generate QR -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Test Script</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: 'Courier New', monospace;
             padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
         }
-
-        .box {
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 15px;
-            margin-bottom: 20px;
+        .test-box {
+            background: #000;
+            border: 1px solid #0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
         }
+        .pass { color: #0f0; }
+        .fail { color: #f00; }
+        .warn { color: #ff0; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        button:hover { background: #0d0; }
+        .result { margin-top: 10px; white-space: pre-wrap; }
     </style>
-    ```
-
 </head>
-
 <body>
-
-    ```
-    <h2>QRIS Statis ➜ QRIS Dinamis (Ambil dari qris.jpeg)</h2>
-
-    <div class="box">
-        <label>Total Bayar (Rp):</label><br>
-        <input type="number" id="nominal" placeholder="contoh: 15000">
+    <h1>🔧 KASIR FUNCTIONALITY TEST</h1>
+    
+    <div class="test-box">
+        <h2>1️⃣ Test Environment</h2>
+        <button onclick="testEnvironment()">Run Test</button>
+        <div id="envResult" class="result"></div>
     </div>
 
-    <button id="proses">Generate QRIS Dinamis</button>
+    <div class="test-box">
+        <h2>2️⃣ Test QRIS Image</h2>
+        <button onclick="testQRISImage()">Run Test</button>
+        <div id="qrisResult" class="result"></div>
+        <canvas id="testCanvas" width="300" height="300" style="border: 1px solid #0f0; margin-top: 10px; display: none;"></canvas>
+    </div>
 
-    <h3>QRIS Dinamis:</h3>
-    <canvas id="qrDyn"></canvas>
+    <div class="test-box">
+        <h2>3️⃣ Test API Connection</h2>
+        <input type="text" id="apiUrl" placeholder="http://localhost:8000" 
+               style="width: 300px; padding: 5px; background: #000; color: #0f0; border: 1px solid #0f0;">
+        <button onclick="testAPIConnection()">Run Test</button>
+        <div id="apiResult" class="result"></div>
+    </div>
 
+    <div class="test-box">
+        <h2>4️⃣ Test Transaction Data</h2>
+        <button onclick="testTransactionData()">Run Test</button>
+        <div id="transactionResult" class="result"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    
     <script>
-        function crc16_ccitt(str) {
-            let crc = 0xFFFF;
-            for (let c of str) {
-                crc ^= c.charCodeAt(0) << 8;
-                for (let i = 0; i < 8; i++) {
-                    if ((crc & 0x8000) !== 0) crc = (crc << 1) ^ 0x1021;
-                    else crc <<= 1;
-                    crc &= 0xFFFF;
-                }
-            }
-            return crc.toString(16).toUpperCase().padStart(4, '0');
+        function log(elementId, message, type = 'info') {
+            const el = document.getElementById(elementId);
+            const colors = {
+                pass: 'class="pass"',
+                fail: 'class="fail"',
+                warn: 'class="warn"',
+                info: ''
+            };
+            el.innerHTML += `<div ${colors[type]}>${message}</div>`;
         }
 
-        document.getElementById("proses").onclick = () => {
-            let nominal = document.getElementById("nominal").value;
-            if (!nominal) return alert("Isi nominal total bayar!");
+        function clear(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
 
-            let img = new Image();
-            img.crossOrigin = "anonymous"; // penting untuk mencegah tainted canvas
-            img.src = "qris.jpeg"; // lokasi file
+        // Test 1: Environment
+        function testEnvironment() {
+            clear('envResult');
+            log('envResult', '🔍 Testing environment...', 'info');
+            
+            // Check browser
+            log('envResult', '✓ Browser: ' + navigator.userAgent.split(' ').pop(), 'pass');
+            
+            // Check localStorage
+            try {
+                localStorage.setItem('test', '1');
+                localStorage.removeItem('test');
+                log('envResult', '✓ LocalStorage: Available', 'pass');
+            } catch (e) {
+                log('envResult', '✗ LocalStorage: Not available - ' + e.message, 'fail');
+            }
 
+            // Check fetch API
+            if (typeof fetch === 'function') {
+                log('envResult', '✓ Fetch API: Available', 'pass');
+            } else {
+                log('envResult', '✗ Fetch API: Not available', 'fail');
+            }
+
+            // Check Canvas
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    log('envResult', '✓ Canvas: Available', 'pass');
+                } else {
+                    log('envResult', '✗ Canvas: Context not available', 'fail');
+                }
+            } catch (e) {
+                log('envResult', '✗ Canvas: Not available - ' + e.message, 'fail');
+            }
+
+            // Check jsQR
+            if (typeof jsQR === 'function') {
+                log('envResult', '✓ jsQR Library: Loaded', 'pass');
+            } else {
+                log('envResult', '✗ jsQR Library: Not loaded', 'fail');
+            }
+
+            log('envResult', '\n📊 Environment test completed!', 'info');
+        }
+
+        // Test 2: QRIS Image
+        function testQRISImage() {
+            clear('qrisResult');
+            log('qrisResult', '🔍 Testing QRIS image...', 'info');
+
+            const qrisUrl = prompt('Enter QRIS image URL:', 'http://localhost:8000/qris.jpeg');
+            if (!qrisUrl) {
+                log('qrisResult', '✗ Test cancelled', 'warn');
+                return;
+            }
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
             img.onload = () => {
-                let canvas = document.createElement("canvas");
-                let ctx = canvas.getContext("2d");
+                log('qrisResult', '✓ Image loaded successfully', 'pass');
+                log('qrisResult', `  Size: ${img.width}x${img.height}px`, 'info');
+
+                // Try to read QR
+                const canvas = document.getElementById('testCanvas');
+                canvas.style.display = 'block';
+                const ctx = canvas.getContext('2d');
                 canvas.width = img.width;
                 canvas.height = img.height;
                 ctx.drawImage(img, 0, 0);
 
-                let raw = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                let qr = jsQR(raw.data, canvas.width, canvas.height);
+                try {
+                    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+                    log('qrisResult', '✓ Canvas not tainted (CORS OK)', 'pass');
 
-                if (!qr) return alert("QR tidak terdeteksi dalam qris.jpeg!");
-
-                let payload = qr.data;
-                payload = payload.replace(/54\d{2}\d+/g, "");
-                payload = payload.replace(/6304([0-9A-Fa-f]{4})$/, "");
-
-                let nominalStr = String(nominal);
-                let length = nominalStr.length.toString().padStart(2, "0");
-                let tag54 = `54${length}${nominalStr}`;
-
-                let payloadNoCRC = payload + tag54 + "6304";
-                let crc = crc16_ccitt(payloadNoCRC);
-                let finalPayload = payloadNoCRC + crc;
-
-                QRCode.toCanvas(document.getElementById("qrDyn"), finalPayload, { width: 300 });
-                alert("QRIS Dinamis berhasil dibuat!");
+                    const qr = jsQR(imageData.data, img.width, img.height);
+                    if (qr) {
+                        log('qrisResult', '✓ QR Code detected!', 'pass');
+                        log('qrisResult', `  Data length: ${qr.data.length} chars`, 'info');
+                        log('qrisResult', `  Preview: ${qr.data.substring(0, 50)}...`, 'info');
+                        
+                        // Check EMV format
+                        if (qr.data.startsWith('00020')) {
+                            log('qrisResult', '✓ EMV QR format detected', 'pass');
+                        } else {
+                            log('qrisResult', '⚠ Not EMV format, might not work', 'warn');
+                        }
+                    } else {
+                        log('qrisResult', '✗ No QR Code detected in image', 'fail');
+                        log('qrisResult', '  Make sure the image contains a valid QR code', 'warn');
+                    }
+                } catch (e) {
+                    log('qrisResult', '✗ Canvas tainted (CORS error)', 'fail');
+                    log('qrisResult', '  Error: ' + e.message, 'fail');
+                    log('qrisResult', '  Solution: Make sure image is served via HTTP (not file://)', 'warn');
+                }
             };
+
+            img.onerror = (e) => {
+                log('qrisResult', '✗ Failed to load image', 'fail');
+                log('qrisResult', '  URL: ' + qrisUrl, 'info');
+                log('qrisResult', '  Check if file exists and path is correct', 'warn');
+            };
+
+            img.src = qrisUrl;
+        }
+
+        // Test 3: API Connection
+        async function testAPIConnection() {
+            clear('apiResult');
+            log('apiResult', '🔍 Testing API connection...', 'info');
+
+            const baseUrl = document.getElementById('apiUrl').value || 'http://localhost:8000';
+            const endpoint = baseUrl + '/kasir/store';
+
+            log('apiResult', `Testing: ${endpoint}`, 'info');
+
+            try {
+                // Test OPTIONS (CORS preflight)
+                log('apiResult', '\n1. Testing CORS preflight...', 'info');
+                const optionsRes = await fetch(endpoint, { method: 'OPTIONS' });
+                log('apiResult', `  Status: ${optionsRes.status}`, optionsRes.ok ? 'pass' : 'warn');
+
+                // Test POST with invalid data
+                log('apiResult', '\n2. Testing POST endpoint...', 'info');
+                const postRes = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ test: 'data' })
+                });
+
+                log('apiResult', `  Status: ${postRes.status}`, 'info');
+                
+                if (postRes.status === 419) {
+                    log('apiResult', '  ✗ CSRF token missing (expected in browser)', 'warn');
+                } else if (postRes.status === 422) {
+                    log('apiResult', '  ✓ Endpoint reachable (validation error expected)', 'pass');
+                } else if (postRes.status === 500) {
+                    log('apiResult', '  ⚠ Server error, check Laravel logs', 'warn');
+                } else {
+                    log('apiResult', `  Response status: ${postRes.status}`, 'info');
+                }
+
+                const data = await postRes.json();
+                log('apiResult', `  Response: ${JSON.stringify(data, null, 2)}`, 'info');
+
+            } catch (e) {
+                log('apiResult', '✗ Connection failed', 'fail');
+                log('apiResult', `  Error: ${e.message}`, 'fail');
+                log('apiResult', '\nPossible causes:', 'warn');
+                log('apiResult', '  - Laravel server not running', 'warn');
+                log('apiResult', '  - Wrong URL', 'warn');
+                log('apiResult', '  - CORS not configured', 'warn');
+            }
+        }
+
+        // Test 4: Transaction Data
+        function testTransactionData() {
+            clear('transactionResult');
+            log('transactionResult', '🔍 Testing transaction data format...', 'info');
+
+            const sampleData = {
+                total_harga: 50000,
+                total_bayar: 55000,
+                metode: 'Tunai',
+                barang: [
+                    {
+                        id_barang: 1,
+                        jumlah_kardus: 2,
+                        jumlah_ecer: 5,
+                        harga_kardus: 10000,
+                        harga_ecer: 2000,
+                        subtotal: 30000
+                    }
+                ]
+            };
+
+            log('transactionResult', 'Sample transaction data:', 'info');
+            log('transactionResult', JSON.stringify(sampleData, null, 2), 'info');
+
+            // Validate structure
+            log('transactionResult', '\nValidating structure...', 'info');
+            
+            if (typeof sampleData.total_harga === 'number') {
+                log('transactionResult', '✓ total_harga: number', 'pass');
+            } else {
+                log('transactionResult', '✗ total_harga: not a number', 'fail');
+            }
+
+            if (typeof sampleData.total_bayar === 'number') {
+                log('transactionResult', '✓ total_bayar: number', 'pass');
+            } else {
+                log('transactionResult', '✗ total_bayar: not a number', 'fail');
+            }
+
+            if (['Tunai', 'Qris'].includes(sampleData.metode)) {
+                log('transactionResult', '✓ metode: valid', 'pass');
+            } else {
+                log('transactionResult', '✗ metode: invalid', 'fail');
+            }
+
+            if (Array.isArray(sampleData.barang) && sampleData.barang.length > 0) {
+                log('transactionResult', '✓ barang: array with items', 'pass');
+            } else {
+                log('transactionResult', '✗ barang: empty or not array', 'fail');
+            }
+
+            // Validate barang items
+            sampleData.barang.forEach((item, i) => {
+                log('transactionResult', `\nItem ${i + 1}:`, 'info');
+                const required = ['id_barang', 'jumlah_kardus', 'jumlah_ecer', 'subtotal'];
+                required.forEach(field => {
+                    if (item[field] !== undefined) {
+                        log('transactionResult', `  ✓ ${field}: ${item[field]}`, 'pass');
+                    } else {
+                        log('transactionResult', `  ✗ ${field}: missing`, 'fail');
+                    }
+                });
+            });
+
+            log('transactionResult', '\n📊 Validation completed!', 'info');
+        }
+
+        // Auto-run environment test on load
+        window.onload = () => {
+            testEnvironment();
         };
     </script>
-    ```
-
 </body>
-
 </html>

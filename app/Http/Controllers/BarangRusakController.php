@@ -17,7 +17,6 @@ class BarangRusakController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
             'id_barang' => 'required',
             'jumlah_kardus' => 'required|integer|min:0',
@@ -26,9 +25,20 @@ class BarangRusakController extends Controller
             'tanggal_rusak' => 'required|date',
         ]);
 
+        $barang = Barang::find($request->id_barang);
+        if ($barang) {
+            $barang->stok_kardus -= $request->jumlah_kardus;
+            $barang->stok_ecer -= $request->jumlah_ecer;
+
+            $barang->stok_kardus = max($barang->stok_kardus, 0);
+            $barang->stok_ecer = max($barang->stok_ecer, 0);
+
+            $barang->save();
+        }
+
         BarangRusak::create($request->all());
 
-        return back()->with('success', 'Data barang rusak berhasil ditambahkan.');
+        return back()->with('success', 'Data barang rusak berhasil ditambahkan dan stok diperbarui.');
     }
 
     public function update(Request $request, BarangRusak $barang_rusak)
@@ -41,16 +51,39 @@ class BarangRusakController extends Controller
             'tanggal_rusak' => 'required|date',
         ]);
 
+        $barang = Barang::find($request->id_barang);
+        if ($barang) {
+            // Hitung selisih
+            $selisihKardus = $request->jumlah_kardus - $barang_rusak->jumlah_kardus;
+            $selisihEcer = $request->jumlah_ecer - $barang_rusak->jumlah_ecer;
+
+            $barang->stok_kardus -= $selisihKardus;
+            $barang->stok_ecer -= $selisihEcer;
+
+            $barang->stok_kardus = max($barang->stok_kardus, 0);
+            $barang->stok_ecer = max($barang->stok_ecer, 0);
+
+            $barang->save();
+        }
+
         $barang_rusak->update($request->all());
 
-        return back()->with('success', 'Data barang rusak berhasil diperbarui.');
+        return back()->with('success', 'Data barang rusak berhasil diperbarui dan stok disesuaikan.');
     }
 
     public function destroy(BarangRusak $barang_rusak)
     {
+        $barang = Barang::find($barang_rusak->id_barang);
+        if ($barang) {
+            $barang->stok_kardus += $barang_rusak->jumlah_kardus;
+            $barang->stok_ecer += $barang_rusak->jumlah_ecer;
+            $barang->save();
+        }
+
         $barang_rusak->delete();
 
-        return back()->with('success', 'Data barang rusak berhasil dihapus.');
+        return back()->with('success', 'Data barang rusak berhasil dihapus dan stok dikembalikan.');
     }
+
 }
 

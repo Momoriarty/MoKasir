@@ -25,7 +25,8 @@ class TransaksiSeeder extends Seeder
 
             $transaksi = Transaksi::create([
                 'tanggal'     => now()->subDays(rand(1, 30)),
-                'id'          => $user->id,
+                'id_user'          => $user->id,
+                'total_harga' => 0,
                 'total_bayar' => 0,
                 'metode'      => 'Qris',
             ]);

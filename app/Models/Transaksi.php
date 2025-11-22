@@ -8,24 +8,24 @@ class Transaksi extends Model
 {
     use HasFactory;
 
-    protected $table      = 'transaksis';
+    protected $table = 'transaksis';
     protected $primaryKey = 'id_transaksi';
 
     protected $fillable = [
         'tanggal',
-        'id',
+        'id_user',
+        'total_harga',
         'total_bayar',
+        'metode'
     ];
 
     // Relasi ke User
     public function user()
     {
-        return $this->belongsTo(User::class, 'id');
+        return $this->belongsTo(User::class, 'id_user');
     }
-
     public function details()
     {
-        return $this->hasMany(TransaksiDetail::class, 'id_transaksi', 'id_transaksi');
+        return $this->hasMany(TransaksiDetail::class, 'id_transaksi');
     }
-
 }

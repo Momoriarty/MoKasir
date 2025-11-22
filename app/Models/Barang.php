@@ -1,16 +1,14 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Barang extends Model
 {
-    use HasFactory;
-
-    protected $table      = 'barangs';
+    protected $table = 'barangs';
     protected $primaryKey = 'id_barang';
-
     protected $fillable = [
         'nama_barang',
         'kategori',
@@ -20,17 +18,42 @@ class Barang extends Model
         'harga_jual_ecer',
         'isi_per_kardus',
         'stok_kardus',
-        'stok_ecer',
+        'stok_ecer'
     ];
 
-    public function barangRusak()
+    public function barangMasuks()
+    {
+        return $this->hasMany(BarangMasuk::class, 'id_barang', 'id_barang');
+    }
+
+    public function barangRusaks()
     {
         return $this->hasMany(BarangRusak::class, 'id_barang', 'id_barang');
     }
 
-    public function transaksiDetails()
+    public function masukHariIni()
     {
-        return $this->hasMany(TransaksiDetail::class, 'barang_id', 'id_barang');
+        return $this->hasMany(BarangMasuk::class, 'id_barang');
     }
 
+    public function rusakHariIni()
+    {
+        return $this->hasMany(BarangRusak::class, 'id_barang');
+    }
+
+    public function getMasukHariIniAttribute()
+    {
+        return $this->barangMasuks()
+            ->join('barangs', 'barang_masuks.id_barang', '=', 'barangs.id_barang')
+            ->whereDate('tanggal_masuk', today())
+            ->sum(DB::raw('jumlah_ecer + jumlah_kardus * barangs.isi_per_kardus'));
+    }
+
+    public function getRusakHariIniAttribute()
+    {
+        return $this->barangRusaks()
+            ->join('barangs', 'barang_rusaks.id_barang', '=', 'barangs.id_barang')
+            ->whereDate('tanggal_rusak', today())
+            ->sum(DB::raw('jumlah_ecer + jumlah_kardus * barangs.isi_per_kardus'));
+    }
 }

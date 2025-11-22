@@ -8,12 +8,12 @@ class TransaksiDetail extends Model
 {
     use HasFactory;
 
-    protected $table      = 'transaksi_details';
+    protected $table = 'transaksi_details';
     protected $primaryKey = 'id_transaksi_detail';
 
     protected $fillable = [
         'id_transaksi',
-        'barang_id',
+        'id_barang',
         'jumlah',
         'harga_jual',
         'subtotal',
@@ -24,8 +24,9 @@ class TransaksiDetail extends Model
         return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id_transaksi');
     }
 
+
     public function barang()
     {
-        return $this->belongsTo(Barang::class, 'barang_id', 'id_barang');
+        return $this->belongsTo(Barang::class, 'id_barang');
     }
 }

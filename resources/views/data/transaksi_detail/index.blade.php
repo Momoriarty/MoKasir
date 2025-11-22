@@ -87,11 +87,11 @@
 
                                             <div class="grid grid-cols-1 gap-3">
 
-                                                <select name="barang_id" required
+                                                <select name="id_barang" required
                                                     class="px-3 py-2 border rounded dark:bg-gray-700">
                                                     @foreach ($barangs as $b)
                                                         <option value="{{ $b->id_barang }}"
-                                                            {{ $b->id_barang == $d->barang_id ? 'selected' : '' }}>
+                                                            {{ $b->id_barang == $d->id_barang ? 'selected' : '' }}>
                                                             {{ $b->nama_barang }}
                                                         </option>
                                                     @endforeach
@@ -183,7 +183,7 @@
 
                 <div class="grid grid-cols-1 gap-3">
 
-                    <select name="barang_id" required class="px-3 py-2 border rounded dark:bg-gray-700">
+                    <select name="id_barang" required class="px-3 py-2 border rounded dark:bg-gray-700">
                         <option value="">-- Pilih Barang --</option>
                         @foreach ($barangs as $b)
                             <option value="{{ $b->id_barang }}">

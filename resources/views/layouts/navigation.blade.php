@@ -13,6 +13,11 @@
                 @php
                     $menu = [
                         [
+                            'title' => 'Kasir',
+                            'route' => 'kasir',
+                            'sub' => [],
+                        ],
+                        [
                             'title' => 'Dashboard',
                             'route' => 'dashboard',
                             'sub' => [],

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\BarangMasuk;
 use App\Models\Barang;
+use App\Models\BarangMasuk;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 class BarangMasukController extends Controller
 {
@@ -36,35 +37,45 @@ class BarangMasukController extends Controller
 
         return back()->with('success', 'Barang masuk berhasil ditambahkan dan stok diperbarui.');
     }
-
-
-    public function update(Request $request, BarangMasuk $barang_masuk)
+    public function update(Request $request, $id)
     {
+        // Validasi input
         $request->validate([
-            'id_barang' => 'required',
+            'id_barang' => 'required|exists:barangs,id_barang', // sesuaikan dengan kolom PK tabel barangs
             'jumlah_kardus' => 'required|integer|min:0',
             'jumlah_ecer' => 'required|integer|min:0',
             'tanggal_masuk' => 'required|date',
         ]);
 
-        // Ambil barang terkait
-        $barang = Barang::find($request->id_barang);
-        if ($barang) {
-            // Hitung selisih stok
-            $selisihKardus = $request->jumlah_kardus - $barang_masuk->jumlah_kardus;
-            $selisihEcer = $request->jumlah_ecer - $barang_masuk->jumlah_ecer;
+        // Ambil record BarangMasuk lama dari DB
+        $barang_masuk = BarangMasuk::findOrFail($id);
 
-            $barang->stok_kardus += $selisihKardus;
-            $barang->stok_ecer += $selisihEcer;
-            $barang->save();
+        $newBarangId = $request->id_barang;
+        $newJumlahKardus = (int) $request->jumlah_kardus;
+        $newJumlahEcer = (int) $request->jumlah_ecer;
+
+        // 1️⃣ Kurangi stok barang lama
+        $oldBarangId = $barang_masuk->id_barang;
+        $oldBarang = Barang::find($oldBarangId);
+        if ($oldBarang) {
+            $oldBarang->stok_kardus = max(0, $oldBarang->stok_kardus - $barang_masuk->jumlah_kardus);
+            $oldBarang->stok_ecer = max(0, $oldBarang->stok_ecer - $barang_masuk->jumlah_ecer);
+            $oldBarang->save();
         }
 
-        // Update record barang_masuks
-        $barang_masuk->update($request->all());
+        // 2️⃣ Tambah stok barang baru
+        $newBarang = Barang::find($newBarangId);
+        if ($newBarang) {
+            $newBarang->stok_kardus += $newJumlahKardus;
+            $newBarang->stok_ecer += $newJumlahEcer;
+            $newBarang->save();
+        }
+
+        // 3️⃣ Update record BarangMasuk
+        $barang_masuk->update($request->only('id_barang', 'jumlah_kardus', 'jumlah_ecer', 'tanggal_masuk'));
 
         return back()->with('success', 'Barang masuk berhasil diperbarui dan stok disesuaikan.');
     }
-
 
     public function destroy(BarangMasuk $barang_masuk)
     {

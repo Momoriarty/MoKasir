@@ -282,26 +282,42 @@
 
         // Quick filter
         function setQuickFilter(period) {
-            const today = new Date();
             let start, end;
+            const now = new Date(); // jangan ubah 'today' saat setDate, simpan aslinya
 
             switch (period) {
                 case 'today':
-                    start = end = today.toISOString().split('T')[0];
+                    start = end = now.toISOString().split('T')[0];
                     break;
+
                 case 'week':
-                    start = new Date(today.setDate(today.getDate() - today.getDay())).toISOString().split('T')[0];
-                    end = new Date().toISOString().split('T')[0];
-                    break;
+                    // Hari Minggu = 0, Senin = 1, dst.
+                    const today = new Date();
+                    let dayOfWeek = today.getDay(); // 0 = Sunday
+                    dayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek; // ubah Sunday jadi 7
+                    const firstDayOfWeek = new Date(today);
+                    firstDayOfWeek.setDate(today.getDate() - dayOfWeek + 1); // Senin
+                    const lastDayOfWeek = new Date(today);
+                    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6); // Minggu
+                    start = firstDayOfWeek.toISOString().split('T')[0];
+                    end = lastDayOfWeek.toISOString().split('T')[0];
+                    
+
                 case 'month':
-                    start = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-                    end = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+                    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                    start = firstDayOfMonth.toISOString().split('T')[0];
+                    end = lastDayOfMonth.toISOString().split('T')[0];
                     break;
+
                 case 'year':
-                    start = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0];
-                    end = new Date(today.getFullYear(), 11, 31).toISOString().split('T')[0];
+                    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+                    const lastDayOfYear = new Date(now.getFullYear(), 11, 31);
+                    start = firstDayOfYear.toISOString().split('T')[0];
+                    end = lastDayOfYear.toISOString().split('T')[0];
                     break;
             }
+
 
             document.getElementById('start_date').value = start;
             document.getElementById('end_date').value = end;

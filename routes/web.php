@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 // Halaman welcome
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 // =======================================

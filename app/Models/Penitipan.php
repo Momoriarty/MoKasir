@@ -19,4 +19,10 @@ class Penitipan extends Model
     {
         return $this->belongsTo(PenitipanDetail::class, 'id_penitipan_detail');
     }
+
+    public function details()
+    {
+        return $this->hasMany(PenitipanDetail::class, 'id_penitipan', 'id_penitipan');
+    }
+
 }

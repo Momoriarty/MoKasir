@@ -20,7 +20,8 @@ class PenitipanDetail extends Model
 
     public function penitipan()
     {
-        return $this->belongsTo(Penitipan::class, 'id_penitipan');
+        return $this->belongsTo(Penitipan::class, 'id_penitipan', 'id_penitipan');
     }
+
 
 }

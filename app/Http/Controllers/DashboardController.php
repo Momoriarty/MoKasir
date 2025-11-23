@@ -25,14 +25,13 @@ class DashboardController extends Controller
         }
     }
 
-    // KPI dengan perbandingan periode
+    // ==================== KPI ====================
     public function kpiData(Request $request)
     {
         try {
             $start = $request->start_date ?? date('Y-m-01');
             $end = $request->end_date ?? date('Y-m-t');
 
-            // Hitung periode sebelumnya
             $startCarbon = Carbon::parse($start);
             $endCarbon = Carbon::parse($end);
             $diff = $startCarbon->diffInDays($endCarbon);
@@ -40,13 +39,9 @@ class DashboardController extends Controller
             $prevStart = $startCarbon->copy()->subDays($diff + 1)->format('Y-m-d');
             $prevEnd = $startCarbon->copy()->subDay()->format('Y-m-d');
 
-            // Current period
             $current = $this->calculateKPI($start, $end, $request);
-
-            // Previous period
             $previous = $this->calculateKPI($prevStart, $prevEnd, $request);
 
-            // Calculate growth
             $growth = [
                 'pendapatan' => $this->calculateGrowth($previous['pendapatan'], $current['pendapatan']),
                 'pengeluaran' => $this->calculateGrowth($previous['pengeluaran'], $current['pengeluaran']),
@@ -64,46 +59,52 @@ class DashboardController extends Controller
         }
     }
 
-    private function calculateKPI($start, $end, $request)
+    private function calculateKPI($start, $end, $request = null)
     {
-        // Transaksi query
-        $queryTransaksi = Transaksi::whereBetween('tanggal', [$start, $end]);
-        if ($request->user)
-            $queryTransaksi->where('id_user', $request->user);
-        if ($request->metode)
-            $queryTransaksi->where('metode', $request->metode);
+        $start = Carbon::parse($start)->startOfDay();
+        $end = Carbon::parse($end)->endOfDay();
 
-        $pendapatan = (float) $queryTransaksi->sum('total_bayar');
-        $transaksiCount = $queryTransaksi->count();
+        // ==================== Pendapatan & Terjual ====================
+        $queryDetail = TransaksiDetail::whereHas('transaksi', function ($q) use ($start, $end, $request) {
+            $q->whereBetween('tanggal', [$start, $end]);
+            if ($request && $request->user)
+                $q->where('id_user', $request->user);
+            if ($request && $request->metode)
+                $q->where('metode', $request->metode);
+        });
+
+        if ($request && $request->kategori) {
+            $queryDetail->whereHas('barang', fn($q) => $q->where('kategori', $request->kategori));
+        }
+
+        $pendapatan = (float) $queryDetail->sum('subtotal');
+        $terjual = (float) $queryDetail->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
+        $transaksiCount = $queryDetail->count();
         $avgTransaksi = $transaksiCount > 0 ? $pendapatan / $transaksiCount : 0;
 
-        // Pengeluaran
+        // ==================== Pengeluaran ====================
         $queryMasuk = DB::table('barang_masuks')
             ->join('barangs', 'barang_masuks.id_barang', '=', 'barangs.id_barang')
             ->whereBetween('tanggal_masuk', [$start, $end]);
 
-        if ($request->kategori)
+        if ($request && $request->kategori) {
             $queryMasuk->where('barangs.kategori', $request->kategori);
+        }
 
-        $pengeluaran = (float) $queryMasuk->sum(DB::raw('barang_masuks.jumlah_kardus * barangs.harga_modal_kardus + barang_masuks.jumlah_ecer * barangs.harga_modal_ecer'));
+        if ($request && $request->stok_status == 'kritis') {
+            $queryMasuk->where(function ($q) {
+                $q->where('stok_kardus', '<', 5)
+                    ->orWhere('stok_ecer', '<', 5);
+            });
+        } elseif ($request && $request->stok_status == 'aman') {
+            $queryMasuk->where('stok_kardus', '>=', 5)
+                ->where('stok_ecer', '>=', 5);
+        }
+
+        $pengeluaran = (float) $queryMasuk->sum(DB::raw('jumlah_kardus * harga_modal_kardus + jumlah_ecer * harga_modal_ecer'));
 
         $margin = $pendapatan - $pengeluaran;
         $marginPercent = $pendapatan > 0 ? ($margin / $pendapatan) * 100 : 0;
-
-        // Barang terjual
-        $queryDetail = TransaksiDetail::whereHas('transaksi', function ($q) use ($start, $end, $request) {
-            $q->whereBetween('tanggal', [$start, $end]);
-            if ($request->user)
-                $q->where('id_user', $request->user);
-            if ($request->metode)
-                $q->where('metode', $request->metode);
-        });
-
-        if ($request->kategori) {
-            $queryDetail->whereHas('barang', fn($q) => $q->where('kategori', $request->kategori));
-        }
-
-        $terjual = (float) $queryDetail->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
 
         return compact('pendapatan', 'pengeluaran', 'margin', 'terjual', 'transaksiCount', 'avgTransaksi', 'marginPercent');
     }
@@ -115,135 +116,80 @@ class DashboardController extends Controller
         return round((($current - $previous) / $previous) * 100, 2);
     }
 
-    // Chart Data
+    // ==================== Chart Data ====================
     public function chartData(Request $request)
     {
-        try {
-            $start = $request->start_date ?? date('Y-m-01');
-            $end = $request->end_date ?? date('Y-m-t');
+        $start = Carbon::parse($request->start_date ?? date('Y-m-01'))->startOfDay();
+        $end = Carbon::parse($request->end_date ?? date('Y-m-t'))->endOfDay();
 
-            $startCarbon = Carbon::parse($start);
-            $endCarbon = Carbon::parse($end);
+        // Pendapatan per hari
+        $transaksiQuery = Transaksi::select(
+            DB::raw('DATE(tanggal) as tgl'),
+            DB::raw('SUM(total_bayar) as total_bayar')
+        )->whereBetween('tanggal', [$start, $end]);
 
-            // Pendapatan per hari
-            $transaksiQuery = Transaksi::select(
-                DB::raw('DATE(tanggal) as tgl'),
-                DB::raw('SUM(total_bayar) as total_bayar')
-            )->whereBetween('tanggal', [$start, $end]);
+        if ($request->user)
+            $transaksiQuery->where('id_user', $request->user);
+        if ($request->metode)
+            $transaksiQuery->where('metode', $request->metode);
+        if ($request->kategori)
+            $transaksiQuery->whereHas('details.barang', fn($q) => $q->where('kategori', $request->kategori));
 
-            if ($request->user)
-                $transaksiQuery->where('id_user', $request->user);
-            if ($request->metode)
-                $transaksiQuery->where('metode', $request->metode);
+        $pendapatanPerHari = $transaksiQuery->groupBy('tgl')->pluck('total_bayar', 'tgl');
 
-            $pendapatanPerHari = $transaksiQuery->groupBy('tgl')->pluck('total_bayar', 'tgl');
+        // Pengeluaran per hari
+        $barangMasuk = DB::table('barang_masuks')
+            ->join('barangs', 'barang_masuks.id_barang', '=', 'barangs.id_barang')
+            ->whereBetween('tanggal_masuk', [$start, $end]);
 
-            // Pengeluaran per hari
-            $barangMasuk = DB::table('barang_masuks')
-                ->join('barangs', 'barang_masuks.id_barang', '=', 'barangs.id_barang')
-                ->whereBetween('tanggal_masuk', [$start, $end]);
-
-            if ($request->kategori)
-                $barangMasuk->where('barangs.kategori', $request->kategori);
-
-            $pengeluaranPerHari = $barangMasuk
-                ->select(
-                    DB::raw('DATE(tanggal_masuk) as tgl'),
-                    DB::raw('SUM(jumlah_kardus * harga_modal_kardus + jumlah_ecer * harga_modal_ecer) as total_modal')
-                )
-                ->groupBy('tgl')
-                ->pluck('total_modal', 'tgl');
-
-            $labels = [];
-            $pendapatan = [];
-            $margin = [];
-
-            for ($date = $startCarbon->copy(); $date->lte($endCarbon); $date->addDay()) {
-                $tgl = $date->format('Y-m-d');
-                $labels[] = $date->format('d M');
-                $pend = $pendapatanPerHari[$tgl] ?? 0;
-                $peng = $pengeluaranPerHari[$tgl] ?? 0;
-                $pendapatan[] = $pend;
-                $margin[] = $pend - $peng;
-            }
-
-            // Top 5 barang
-            $top5Query = TransaksiDetail::select('id_barang', DB::raw('SUM(jumlah_kardus + jumlah_ecer) as total'))
-                ->whereHas('transaksi', function ($q) use ($start, $end, $request) {
-                    $q->whereBetween('tanggal', [$start, $end]);
-                    if ($request->user)
-                        $q->where('id_user', $request->user);
-                    if ($request->metode)
-                        $q->where('metode', $request->metode);
-                });
-
-            if ($request->kategori) {
-                $top5Query->whereHas('barang', fn($q) => $q->where('kategori', $request->kategori));
-            }
-
-            $top5 = $top5Query->groupBy('id_barang')->orderByDesc('total')->limit(5)->get();
-            $top5Labels = $top5->map(fn($t) => $t->barang->nama_barang ?? 'Unknown');
-            $top5Data = $top5->pluck('total');
-
-            return response()->json(compact('labels', 'pendapatan', 'margin', 'top5Labels', 'top5Data'));
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if ($request->kategori)
+            $barangMasuk->where('barangs.kategori', $request->kategori);
+        if ($request->stok_status == 'kritis') {
+            $barangMasuk->where(function ($q) {
+                $q->where('stok_kardus', '<', 5)
+                    ->orWhere('stok_ecer', '<', 5);
+            });
+        } elseif ($request->stok_status == 'aman') {
+            $barangMasuk->where('stok_kardus', '>=', 5)
+                ->where('stok_ecer', '>=', 5);
         }
-    }
 
-    // Metode pembayaran analytics
-    public function paymentMethodData(Request $request)
-    {
-        try {
-            $start = $request->start_date ?? date('Y-m-01');
-            $end = $request->end_date ?? date('Y-m-t');
-
-            $data = Transaksi::select('metode', DB::raw('COUNT(*) as count'), DB::raw('SUM(total_bayar) as total'))
-                ->whereBetween('tanggal', [$start, $end]);
-
-            if ($request->user)
-                $data->where('id_user', $request->user);
-
-            $result = $data->groupBy('metode')->get();
-
-            return response()->json([
-                'labels' => $result->pluck('metode'),
-                'counts' => $result->pluck('count'),
-                'totals' => $result->pluck('total')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    // Performance per kasir
-    public function cashierPerformance(Request $request)
-    {
-        try {
-            $start = $request->start_date ?? date('Y-m-01');
-            $end = $request->end_date ?? date('Y-m-t');
-
-            $data = Transaksi::select(
-                'id_user',
-                DB::raw('COUNT(*) as transaksi_count'),
-                DB::raw('SUM(total_bayar) as total_penjualan')
+        $pengeluaranPerHari = $barangMasuk
+            ->select(
+                DB::raw('DATE(tanggal_masuk) as tgl'),
+                DB::raw('SUM(jumlah_kardus * harga_modal_kardus + jumlah_ecer * harga_modal_ecer) as total_modal')
             )
-                ->whereBetween('tanggal', [$start, $end])
-                ->groupBy('id_user')
-                ->with('user')
-                ->get();
+            ->groupBy('tgl')
+            ->pluck('total_modal', 'tgl');
 
-            return response()->json([
-                'labels' => $data->map(fn($d) => $d->user->name ?? 'Unknown'),
-                'transaksiCount' => $data->pluck('transaksi_count'),
-                'totalPenjualan' => $data->pluck('total_penjualan')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        $labels = $pendapatan = $margin = [];
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+            $tgl = $date->format('Y-m-d');
+            $labels[] = $date->format('d M');
+            $pend = $pendapatanPerHari[$tgl] ?? 0;
+            $peng = $pengeluaranPerHari[$tgl] ?? 0;
+            $pendapatan[] = $pend;
+            $margin[] = $pend - $peng;
         }
+
+        // Top 5 barang
+        $top5Query = TransaksiDetail::select('id_barang', DB::raw('SUM(jumlah_kardus + jumlah_ecer) as total'))
+            ->whereHas('transaksi', fn($q) => $q->whereBetween('tanggal', [$start, $end]));
+
+        if ($request->user)
+            $top5Query->whereHas('transaksi', fn($q) => $q->where('id_user', $request->user));
+        if ($request->metode)
+            $top5Query->whereHas('transaksi', fn($q) => $q->where('metode', $request->metode));
+        if ($request->kategori)
+            $top5Query->whereHas('barang', fn($q) => $q->where('kategori', $request->kategori));
+
+        $top5 = $top5Query->groupBy('id_barang')->orderByDesc('total')->limit(5)->get();
+        $top5Labels = $top5->map(fn($t) => $t->barang->nama_barang ?? 'Unknown');
+        $top5Data = $top5->pluck('total');
+
+        return response()->json(compact('labels', 'pendapatan', 'margin', 'top5Labels', 'top5Data'));
     }
 
-    // Kategori analytics
     public function categoryAnalytics(Request $request)
     {
         try {
@@ -272,149 +218,176 @@ class DashboardController extends Controller
         }
     }
 
-    // Peak hours analysis
+
+    // ==================== Metode Pembayaran ====================
+    public function paymentMethodData(Request $request)
+    {
+        $start = Carbon::parse($request->start_date ?? date('Y-m-01'))->startOfDay();
+        $end = Carbon::parse($request->end_date ?? date('Y-m-t'))->endOfDay();
+
+        $data = Transaksi::whereBetween('tanggal', [$start, $end]);
+        if ($request->user)
+            $data->where('id_user', $request->user);
+        if ($request->metode)
+            $data->where('metode', $request->metode);
+        if ($request->kategori)
+            $data->whereHas('details.barang', fn($q) => $q->where('kategori', $request->kategori));
+
+        $result = $data->select('metode', DB::raw('COUNT(*) as count'), DB::raw('SUM(total_bayar) as total'))
+            ->groupBy('metode')->get();
+
+        return response()->json([
+            'labels' => $result->pluck('metode'),
+            'counts' => $result->pluck('count'),
+            'totals' => $result->pluck('total')
+        ]);
+    }
+
+    // ==================== Performa Kasir ====================
+    public function cashierPerformance(Request $request)
+    {
+        $start = Carbon::parse($request->start_date ?? date('Y-m-01'))->startOfDay();
+        $end = Carbon::parse($request->end_date ?? date('Y-m-t'))->endOfDay();
+
+        $data = Transaksi::whereBetween('tanggal', [$start, $end]);
+        if ($request->user)
+            $data->where('id_user', $request->user);
+        if ($request->metode)
+            $data->where('metode', $request->metode);
+        if ($request->kategori)
+            $data->whereHas('details.barang', fn($q) => $q->where('kategori', $request->kategori));
+
+        $result = $data->select(
+            'id_user',
+            DB::raw('COUNT(*) as transaksi_count'),
+            DB::raw('SUM(total_bayar) as total_penjualan')
+        )->groupBy('id_user')->with('user')->get();
+
+        return response()->json([
+            'labels' => $result->map(fn($d) => $d->user->name ?? 'Unknown'),
+            'transaksiCount' => $result->pluck('transaksi_count'),
+            'totalPenjualan' => $result->pluck('total_penjualan')
+        ]);
+    }
+
+    // ==================== Jam Tersibuk ====================
     public function peakHours(Request $request)
     {
-        try {
-            $start = $request->start_date ?? date('Y-m-01');
-            $end = $request->end_date ?? date('Y-m-t');
+        $start = Carbon::parse($request->start_date ?? date('Y-m-01'))->startOfDay();
+        $end = Carbon::parse($request->end_date ?? date('Y-m-t'))->endOfDay();
 
-            $data = Transaksi::select(
-                DB::raw('HOUR(tanggal) as jam'),
-                DB::raw('COUNT(*) as transaksi_count'),
-                DB::raw('SUM(total_bayar) as total')
-            )
-                ->whereBetween('tanggal', [$start, $end])
-                ->groupBy('jam')
-                ->orderBy('jam')
-                ->get();
+        $data = Transaksi::whereBetween('tanggal', [$start, $end]);
+        if ($request->user)
+            $data->where('id_user', $request->user);
+        if ($request->metode)
+            $data->where('metode', $request->metode);
+        if ($request->kategori)
+            $data->whereHas('details.barang', fn($q) => $q->where('kategori', $request->kategori));
 
-            return response()->json([
-                'labels' => $data->pluck('jam')->map(fn($h) => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00'),
-                'transaksiCount' => $data->pluck('transaksi_count'),
-                'total' => $data->pluck('total')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        $result = $data->select(
+            DB::raw('HOUR(tanggal) as jam'),
+            DB::raw('COUNT(*) as transaksi_count'),
+            DB::raw('SUM(total_bayar) as total')
+        )->groupBy('jam')->orderBy('jam')->get();
+
+        return response()->json([
+            'labels' => $result->pluck('jam')->map(fn($h) => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00'),
+            'transaksiCount' => $result->pluck('transaksi_count'),
+            'total' => $result->pluck('total')
+        ]);
     }
 
-    // Stok alerts
+    // ==================== Stok Alerts ====================
     public function stokAlerts(Request $request)
     {
-        try {
-            $kritis = Barang::where(function ($q) {
-                $q->where('stok_kardus', '<', 5)
-                    ->orWhere('stok_ecer', '<', 5);
-            })->get();
+        $kritis = Barang::query();
+        if ($request->kategori)
+            $kritis->where('kategori', $request->kategori);
+        $kritis->where(function ($q) {
+            $q->where('stok_kardus', '<', 5)
+                ->orWhere('stok_ecer', '<', 5);
+        });
 
-            $habis = Barang::where('stok_kardus', 0)
-                ->where('stok_ecer', 0)
-                ->get();
+        $habis = Barang::query();
+        if ($request->kategori)
+            $habis->where('kategori', $request->kategori);
+        $habis->where('stok_kardus', 0)->where('stok_ecer', 0);
 
-            return response()->json([
-                'kritis' => $kritis->map(fn($b) => [
-                    'id' => $b->id_barang,
-                    'nama' => $b->nama_barang,
-                    'kategori' => $b->kategori,
-                    'stok_kardus' => $b->stok_kardus,
-                    'stok_ecer' => $b->stok_ecer
-                ]),
-                'habis' => $habis->map(fn($b) => [
-                    'id' => $b->id_barang,
-                    'nama' => $b->nama_barang,
-                    'kategori' => $b->kategori
-                ])
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'kritis' => $kritis->get()->map(fn($b) => [
+                'id' => $b->id_barang,
+                'nama' => $b->nama_barang,
+                'kategori' => $b->kategori,
+                'stok_kardus' => $b->stok_kardus,
+                'stok_ecer' => $b->stok_ecer
+            ]),
+            'habis' => $habis->get()->map(fn($b) => [
+                'id' => $b->id_barang,
+                'nama' => $b->nama_barang,
+                'kategori' => $b->kategori
+            ])
+        ]);
     }
 
-    // Stok chart
+    // ==================== Stok Chart ====================
     public function stokChartData(Request $request)
     {
-        try {
-            $kategori = $request->kategori;
-            $stok_status = $request->stok_status;
+        $barangs = Barang::query();
+        if ($request->kategori)
+            $barangs->where('kategori', $request->kategori);
 
-            $barangs = Barang::query();
-            if ($kategori)
-                $barangs->where('kategori', $kategori);
-
-            $barangs = $barangs->get();
-
-            if ($stok_status == 'kritis') {
-                $barangs = $barangs->filter(fn($b) => $b->stok_kardus < 5 || $b->stok_ecer < 5);
-            } elseif ($stok_status == 'aman') {
-                $barangs = $barangs->filter(fn($b) => $b->stok_kardus >= 5 && $b->stok_ecer >= 5);
-            }
-
-            $labels = $barangs->pluck('nama_barang');
-            $stokKardus = $barangs->pluck('stok_kardus');
-            $stokEcer = $barangs->pluck('stok_ecer');
-            $colorsKardus = $stokKardus->map(fn($v) => $v < 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(34, 197, 94, 0.8)');
-            $colorsEcer = $stokEcer->map(fn($v) => $v < 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(59, 130, 246, 0.8)');
-
-            return response()->json([
-                'labels' => $labels,
-                'stokKardus' => $stokKardus,
-                'stokEcer' => $stokEcer,
-                'colorsKardus' => $colorsKardus,
-                'colorsEcer' => $colorsEcer,
-                'ids' => $barangs->pluck('id_barang')
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if ($request->stok_status == 'kritis') {
+            $barangs->where(function ($q) {
+                $q->where('stok_kardus', '<', 5)
+                    ->orWhere('stok_ecer', '<', 5);
+            });
+        } elseif ($request->stok_status == 'aman') {
+            $barangs->where('stok_kardus', '>=', 5)
+                ->where('stok_ecer', '>=', 5);
         }
+
+        $barangs = $barangs->get();
+        return response()->json([
+            'labels' => $barangs->pluck('nama_barang'),
+            'stokKardus' => $barangs->pluck('stok_kardus'),
+            'stokEcer' => $barangs->pluck('stok_ecer'),
+            'colorsKardus' => $barangs->pluck('stok_kardus')->map(fn($v) => $v < 5 ? 'rgba(239,68,68,0.8)' : 'rgba(34,197,94,0.8)'),
+            'colorsEcer' => $barangs->pluck('stok_ecer')->map(fn($v) => $v < 5 ? 'rgba(239,68,68,0.8)' : 'rgba(59,130,246,0.8)'),
+            'ids' => $barangs->pluck('id_barang')
+        ]);
     }
 
-    // Detail stok per barang
+    // ==================== Detail Stok ====================
     public function detailStok($id_barang)
     {
-        try {
-            $barang = Barang::findOrFail($id_barang);
+        $barang = Barang::findOrFail($id_barang);
+        $start = request()->start_date ?? Carbon::now()->subDays(30)->format('Y-m-d');
+        $end = request()->end_date ?? Carbon::now()->format('Y-m-d');
 
-            $start = request()->start_date ?? Carbon::now()->subDays(30)->format('Y-m-d');
-            $end = request()->end_date ?? Carbon::now()->format('Y-m-d');
+        $period = [];
+        $labels = [];
+        $startCarbon = Carbon::parse($start);
+        $endCarbon = Carbon::parse($end);
 
-            $period = [];
-            $labels = [];
-            $startCarbon = Carbon::parse($start);
-            $endCarbon = Carbon::parse($end);
-
-            for ($date = $startCarbon->copy(); $date->lte($endCarbon); $date->addDay()) {
-                $labels[] = $date->format('d M');
-                $period[] = $date->format('Y-m-d');
-            }
-
-            $masuk = $rusak = $terjual = [];
-
-            foreach ($period as $p) {
-                $masuk[] = DB::table('barang_masuks')
-                    ->where('id_barang', $id_barang)
-                    ->whereDate('tanggal_masuk', $p)
-                    ->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
-
-                $rusak[] = DB::table('barang_rusaks')
-                    ->where('id_barang', $id_barang)
-                    ->whereDate('tanggal_rusak', $p)
-                    ->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
-
-                $terjual[] = TransaksiDetail::where('id_barang', $id_barang)
-                    ->whereHas('transaksi', fn($q) => $q->whereDate('tanggal', $p))
-                    ->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
-            }
-
-            return response()->json([
-                'nama_barang' => $barang->nama_barang,
-                'labels' => $labels,
-                'masuk' => $masuk,
-                'rusak' => $rusak,
-                'terjual' => $terjual
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        for ($date = $startCarbon->copy(); $date->lte($endCarbon); $date->addDay()) {
+            $period[] = $date->format('Y-m-d');
+            $labels[] = $date->format('d M');
         }
+
+        $masuk = $rusak = $terjual = [];
+
+        foreach ($period as $p) {
+            $masuk[] = DB::table('barang_masuks')->where('id_barang', $id_barang)->whereDate('tanggal_masuk', $p)->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
+            $rusak[] = DB::table('barang_rusaks')->where('id_barang', $id_barang)->whereDate('tanggal_rusak', $p)->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
+            $terjual[] = TransaksiDetail::where('id_barang', $id_barang)->whereHas('transaksi', fn($q) => $q->whereDate('tanggal', $p))->sum(DB::raw('jumlah_kardus + jumlah_ecer'));
+        }
+
+        return response()->json([
+            'nama_barang' => $barang->nama_barang,
+            'labels' => $labels,
+            'masuk' => $masuk,
+            'rusak' => $rusak,
+            'terjual' => $terjual
+        ]);
     }
 }

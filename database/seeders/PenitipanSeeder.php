@@ -1,24 +1,35 @@
 <?php
+
 namespace Database\Seeders;
 
-use App\Models\Penitipan;
 use Illuminate\Database\Seeder;
+use App\Models\Penitipan;
 
 class PenitipanSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Penitipan::create([
-            'nama_penitip' => 'Penitipan A',
-            'tanggal_titip' => '2024-01-15',
-        ]);
+        $penitipanData = [
+            [
+                'nama_penitip' => 'Penitipan A',
+                'tanggal_titip' => '2024-01-15',
+            ],
+            [
+                'nama_penitip' => 'Penitipan B',
+                'tanggal_titip' => '2024-01-16',
+            ],
+            [
+                'nama_penitip' => 'Penitipan C',
+                'tanggal_titip' => '2024-02-01',
+            ],
+            [
+                'nama_penitip' => 'Penitipan D',
+                'tanggal_titip' => '2024-02-05',
+            ],
+        ];
 
-        Penitipan::create([
-            'nama_penitip' => 'Penitipan B',
-            'tanggal_titip' => '2024-01-16',
-        ]);
+        foreach ($penitipanData as $item) {
+            Penitipan::create($item);
+        }
     }
 }

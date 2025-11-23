@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Barang;
+use App\Models\BarangMasuk;
+use Illuminate\Http\Request;
 
 class BarangController extends Controller
 {
@@ -21,6 +22,7 @@ class BarangController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input
         $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
             'kategori' => 'nullable|string|max:255',
@@ -33,10 +35,23 @@ class BarangController extends Controller
             'stok_ecer' => 'required|integer|min:0',
         ]);
 
-        Barang::create($validated);
+        // Simpan barang
+        $barang = Barang::create($validated);
 
-        return redirect()->back()->with('success', 'Barang berhasil ditambahkan.');
+        // Jika stok awal > 0, buat record barang masuk
+        if ($validated['stok_kardus'] > 0 || $validated['stok_ecer'] > 0) {
+            BarangMasuk::create([
+                'id_barang' => $barang->id_barang,
+                'jumlah_kardus' => $validated['stok_kardus'],
+                'jumlah_ecer' => $validated['stok_ecer'],
+                'tanggal_masuk' => now(), // atau bisa request dari form
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Barang berhasil ditambahkan' .
+            (($validated['stok_kardus'] > 0 || $validated['stok_ecer'] > 0) ? ' dan stok masuk otomatis tercatat.' : '.'));
     }
+
 
     /**
      * Update the specified resource in storage.

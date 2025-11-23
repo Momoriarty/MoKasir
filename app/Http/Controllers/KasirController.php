@@ -2,21 +2,32 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use App\Models\Barang;
 use App\Models\Transaksi;
+use Illuminate\Http\Request;
+use App\Models\PenitipanDetail;
 use App\Models\TransaksiDetail;
-use Carbon\Carbon;
+use App\Models\TransaksiDetailPenitipan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class KasirController extends Controller
 {
     public function index()
     {
         try {
+            // Ambil semua barang
             $barangs = Barang::orderBy('nama_barang')->get();
-            return view('kasir', compact('barangs'));
+
+            // Ambil penitipan details yang masih ada sisa, sekaligus relasi penitipan
+            $penitipanDetails = PenitipanDetail::with('penitipan')
+                ->where('jumlah_sisa', '>', 0)
+                ->orderBy('nama_barang')
+                ->get();
+
+            // Kirim ke view
+            return view('kasir', compact('barangs', 'penitipanDetails'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memuat halaman kasir: ' . $e->getMessage());
         }
@@ -33,14 +44,30 @@ class KasirController extends Controller
                 'total_harga' => 'required|numeric|min:0',
                 'total_bayar' => 'required|numeric|min:0',
                 'metode' => 'required|in:Tunai,Qris',
-                'barang' => 'required|array|min:1',
+                'barang' => 'nullable|array',
                 'barang.*.id_barang' => 'required|exists:barangs,id_barang',
                 'barang.*.jumlah_kardus' => 'required|integer|min:0',
                 'barang.*.jumlah_ecer' => 'required|integer|min:0',
                 'barang.*.harga_kardus' => 'nullable|numeric|min:0',
                 'barang.*.harga_ecer' => 'nullable|numeric|min:0',
                 'barang.*.subtotal' => 'required|numeric|min:0',
+                'penitipan' => 'nullable|array',
+                'penitipan.*.id_penitipan_detail' => 'required|exists:penitipan_details,id_penitipan_detail',
+                'penitipan.*.jumlah' => 'required|integer|min:1',
+                'penitipan.*.harga_jual' => 'required|numeric|min:0',
+                'penitipan.*.subtotal' => 'required|numeric|min:0',
             ]);
+
+            // Validasi minimal harus ada barang atau penitipan
+            if (
+                (!$request->has('barang') || count($request->barang) == 0) &&
+                (!$request->has('penitipan') || count($request->penitipan) == 0)
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Keranjang kosong, minimal harus ada 1 barang'
+                ], 400);
+            }
 
             // Validasi pembayaran
             if ($request->total_bayar < $request->total_harga) {
@@ -52,27 +79,45 @@ class KasirController extends Controller
 
             DB::beginTransaction();
 
-            // Validasi stok untuk setiap barang
-            foreach ($request->barang as $item) {
-                $barang = Barang::lockForUpdate()->find($item['id_barang']);
+            // ========== VALIDASI STOK BARANG ==========
+            if ($request->has('barang') && count($request->barang) > 0) {
+                foreach ($request->barang as $item) {
+                    $barang = Barang::lockForUpdate()->find($item['id_barang']);
 
-                if (!$barang) {
-                    throw new \Exception("Barang ID {$item['id_barang']} tidak ditemukan");
+                    if (!$barang) {
+                        throw new \Exception("Barang ID {$item['id_barang']} tidak ditemukan");
+                    }
+
+                    // Cek stok kardus
+                    if ($item['jumlah_kardus'] > $barang->stok_kardus) {
+                        throw new \Exception("Stok kardus {$barang->nama_barang} tidak mencukupi. Tersedia: {$barang->stok_kardus}, Diminta: {$item['jumlah_kardus']}");
+                    }
+
+                    // Cek stok ecer
+                    if ($item['jumlah_ecer'] > $barang->stok_ecer) {
+                        throw new \Exception("Stok ecer {$barang->nama_barang} tidak mencukupi. Tersedia: {$barang->stok_ecer}, Diminta: {$item['jumlah_ecer']}");
+                    }
+
+                    // Minimal harus ada transaksi (kardus atau ecer)
+                    if ($item['jumlah_kardus'] <= 0 && $item['jumlah_ecer'] <= 0) {
+                        throw new \Exception("Jumlah kardus dan ecer tidak boleh nol untuk {$barang->nama_barang}");
+                    }
                 }
+            }
 
-                // Cek stok kardus
-                if ($item['jumlah_kardus'] > $barang->stok_kardus) {
-                    throw new \Exception("Stok kardus {$barang->nama_barang} tidak mencukupi. Tersedia: {$barang->stok_kardus}, Diminta: {$item['jumlah_kardus']}");
-                }
+            // ========== VALIDASI STOK PENITIPAN ==========
+            if ($request->has('penitipan') && count($request->penitipan) > 0) {
+                foreach ($request->penitipan as $item) {
+                    $penitipanDetail = PenitipanDetail::lockForUpdate()->find($item['id_penitipan_detail']);
 
-                // Cek stok ecer
-                if ($item['jumlah_ecer'] > $barang->stok_ecer) {
-                    throw new \Exception("Stok ecer {$barang->nama_barang} tidak mencukupi. Tersedia: {$barang->stok_ecer}, Diminta: {$item['jumlah_ecer']}");
-                }
+                    if (!$penitipanDetail) {
+                        throw new \Exception("Penitipan ID {$item['id_penitipan_detail']} tidak ditemukan");
+                    }
 
-                // Minimal harus ada transaksi (kardus atau ecer)
-                if ($item['jumlah_kardus'] <= 0 && $item['jumlah_ecer'] <= 0) {
-                    throw new \Exception("Jumlah kardus dan ecer tidak boleh nol untuk {$barang->nama_barang}");
+                    // Cek stok penitipan
+                    if ($item['jumlah'] > $penitipanDetail->jumlah_sisa) {
+                        throw new \Exception("Stok penitipan {$penitipanDetail->nama_barang} tidak mencukupi. Tersedia: {$penitipanDetail->jumlah_sisa}, Diminta: {$item['jumlah']}");
+                    }
                 }
             }
 
@@ -84,7 +129,7 @@ class KasirController extends Controller
 
             $totalHargaFinal = $request->total_harga + $biayaAdmin;
 
-            // Buat transaksi
+            // ========== BUAT TRANSAKSI ==========
             $transaksi = Transaksi::create([
                 'tanggal' => Carbon::now(),
                 'id_user' => Auth::id(),
@@ -95,32 +140,62 @@ class KasirController extends Controller
 
             \Log::info('Transaksi created:', ['id' => $transaksi->id_transaksi]);
 
-            // Simpan detail transaksi dan update stok
-            foreach ($request->barang as $item) {
-                // Ambil barang dengan lock
-                $barang = Barang::lockForUpdate()->find($item['id_barang']);
+            // ========== SIMPAN DETAIL BARANG STOK ==========
+            if ($request->has('barang') && count($request->barang) > 0) {
+                foreach ($request->barang as $item) {
+                    // Ambil barang dengan lock
+                    $barang = Barang::lockForUpdate()->find($item['id_barang']);
 
-                // Simpan detail transaksi
-                TransaksiDetail::create([
-                    'id_transaksi' => $transaksi->id_transaksi,
-                    'id_barang' => $item['id_barang'],
-                    'jumlah_kardus' => $item['jumlah_kardus'],
-                    'jumlah_ecer' => $item['jumlah_ecer'],
-                    'subtotal' => $item['subtotal'],
-                ]);
+                    // Simpan detail transaksi
+                    TransaksiDetail::create([
+                        'id_transaksi' => $transaksi->id_transaksi,
+                        'id_barang' => $item['id_barang'],
+                        'jumlah_kardus' => $item['jumlah_kardus'],
+                        'jumlah_ecer' => $item['jumlah_ecer'],
+                        'subtotal' => $item['subtotal'],
+                    ]);
 
-                // Update stok barang
-                $barang->stok_kardus -= $item['jumlah_kardus'];
-                $barang->stok_ecer -= $item['jumlah_ecer'];
-                $barang->save();
+                    // Update stok barang
+                    $barang->stok_kardus -= $item['jumlah_kardus'];
+                    $barang->stok_ecer -= $item['jumlah_ecer'];
+                    $barang->save();
 
-                \Log::info("Stok updated", [
-                    'barang' => $barang->nama_barang,
-                    'kardus' => -$item['jumlah_kardus'],
-                    'ecer' => -$item['jumlah_ecer'],
-                    'stok_kardus_remaining' => $barang->stok_kardus,
-                    'stok_ecer_remaining' => $barang->stok_ecer
-                ]);
+                    \Log::info("Stok barang updated", [
+                        'barang' => $barang->nama_barang,
+                        'kardus' => -$item['jumlah_kardus'],
+                        'ecer' => -$item['jumlah_ecer'],
+                        'stok_kardus_remaining' => $barang->stok_kardus,
+                        'stok_ecer_remaining' => $barang->stok_ecer
+                    ]);
+                }
+            }
+
+            // ========== SIMPAN DETAIL BARANG PENITIPAN ==========
+            if ($request->has('penitipan') && count($request->penitipan) > 0) {
+                foreach ($request->penitipan as $item) {
+                    // Ambil penitipan detail dengan lock
+                    $penitipanDetail = PenitipanDetail::lockForUpdate()->find($item['id_penitipan_detail']);
+
+                    // Simpan detail transaksi penitipan
+                    TransaksiDetailPenitipan::create([
+                        'id_transaksi' => $transaksi->id_transaksi,
+                        'id_penitipan_detail' => $item['id_penitipan_detail'],
+                        'jumlah' => $item['jumlah'],
+                        'harga_jual' => $item['harga_jual'],
+                        'subtotal' => $item['subtotal'],
+                    ]);
+
+                    // Update stok penitipan
+                    $penitipanDetail->jumlah_terjual += $item['jumlah'];
+                    $penitipanDetail->jumlah_sisa -= $item['jumlah'];
+                    $penitipanDetail->save();
+
+                    \Log::info("Stok penitipan updated", [
+                        'barang' => $penitipanDetail->nama_barang,
+                        'jumlah_terjual' => $item['jumlah'],
+                        'jumlah_sisa_remaining' => $penitipanDetail->jumlah_sisa
+                    ]);
+                }
             }
 
             DB::commit();
@@ -189,11 +264,36 @@ class KasirController extends Controller
         }
     }
 
+    // Method untuk cek stok penitipan real-time (AJAX)
+    public function checkStokPenitipan($id_penitipan_detail)
+    {
+        try {
+            $penitipanDetail = PenitipanDetail::with('penitipan')->findOrFail($id_penitipan_detail);
+
+            return response()->json([
+                'success' => true,
+                'jumlah_sisa' => $penitipanDetail->jumlah_sisa,
+                'harga_jual' => $penitipanDetail->harga_jual,
+                'nama_barang' => $penitipanDetail->nama_barang,
+                'nama_penitip' => $penitipanDetail->penitipan->nama_penitip,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Barang penitipan tidak ditemukan'
+            ], 404);
+        }
+    }
+
     // Method untuk print struk
     public function printStruk($id_transaksi)
     {
         try {
-            $transaksi = Transaksi::with(['user', 'details.barang'])->findOrFail($id_transaksi);
+            $transaksi = Transaksi::with([
+                'user',
+                'details.barang',
+                'detailPenitipans.penitipanDetail.penitipan'
+            ])->findOrFail($id_transaksi);
 
             return view('kasir.print-struk', compact('transaksi'));
         } catch (\Exception $e) {

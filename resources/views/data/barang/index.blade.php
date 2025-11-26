@@ -29,13 +29,13 @@
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
                                     Harga Modal (Kardus)</th>
-                                    <th
+                                <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
                                     Harga Jual (Kardus)</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
                                     Harga Modal (Ecer)</th>
-                                
+
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
                                     Harga Jual (Ecer)</th>
@@ -60,7 +60,7 @@
                                     <td class="px-6 py-2">{{ $barang->nama_barang }}</td>
                                     <td class="px-6 py-2">Rp
                                         {{ number_format($barang->harga_modal_kardus, 0, ',', '.') }}</td>
-                                        <td class="px-6 py-2">Rp
+                                    <td class="px-6 py-2">Rp
                                         {{ number_format($barang->harga_jual_kardus, 0, ',', '.') }}</td>
                                     <td class="px-6 py-2">Rp {{ number_format($barang->harga_modal_ecer, 0, ',', '.') }}
                                     </td>
@@ -161,6 +161,17 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        Showing {{ $barangs->firstItem() }} to {{ $barangs->lastItem() }} of {{ $barangs->total() }}
+                        results
+                    </div>
+
+                    <div>
+                        {{ $barangs->onEachSide(1)->links('pagination::tailwind') }}
+                    </div>
+                </div>
+
             </div>
         </div>
 

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
@@ -13,7 +12,7 @@ class BarangController extends Controller
      */
     public function index()
     {
-        $barangs = Barang::all();
+        $barangs = Barang::paginate(10); 
         return view('data.barang.index', compact('barangs'));
     }
 
@@ -24,15 +23,15 @@ class BarangController extends Controller
     {
         // Validasi input
         $validated = $request->validate([
-            'nama_barang' => 'required|string|max:255',
-            'kategori' => 'nullable|string|max:255',
+            'nama_barang'        => 'required|string|max:255',
+            'kategori'           => 'nullable|string|max:255',
             'harga_modal_kardus' => 'required|numeric|min:0',
-            'harga_modal_ecer' => 'required|numeric|min:0',
-            'harga_jual_kardus' => 'required|numeric|min:0',
-            'harga_jual_ecer' => 'required|numeric|min:0',
-            'isi_per_kardus' => 'required|integer|min:1',
-            'stok_kardus' => 'required|integer|min:0',
-            'stok_ecer' => 'required|integer|min:0',
+            'harga_modal_ecer'   => 'required|numeric|min:0',
+            'harga_jual_kardus'  => 'required|numeric|min:0',
+            'harga_jual_ecer'    => 'required|numeric|min:0',
+            'isi_per_kardus'     => 'required|integer|min:1',
+            'stok_kardus'        => 'required|integer|min:0',
+            'stok_ecer'          => 'required|integer|min:0',
         ]);
 
         // Simpan barang
@@ -41,9 +40,9 @@ class BarangController extends Controller
         // Jika stok awal > 0, buat record barang masuk
         if ($validated['stok_kardus'] > 0 || $validated['stok_ecer'] > 0) {
             BarangMasuk::create([
-                'id_barang' => $barang->id_barang,
+                'id_barang'     => $barang->id_barang,
                 'jumlah_kardus' => $validated['stok_kardus'],
-                'jumlah_ecer' => $validated['stok_ecer'],
+                'jumlah_ecer'   => $validated['stok_ecer'],
                 'tanggal_masuk' => now(), // atau bisa request dari form
             ]);
         }
@@ -51,7 +50,6 @@ class BarangController extends Controller
         return redirect()->back()->with('success', 'Barang berhasil ditambahkan' .
             (($validated['stok_kardus'] > 0 || $validated['stok_ecer'] > 0) ? ' dan stok masuk otomatis tercatat.' : '.'));
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -61,15 +59,15 @@ class BarangController extends Controller
         $barang = Barang::findOrFail($id);
 
         $validated = $request->validate([
-            'nama_barang' => 'required|string|max:255',
-            'kategori' => 'nullable|string|max:255',
+            'nama_barang'        => 'required|string|max:255',
+            'kategori'           => 'nullable|string|max:255',
             'harga_modal_kardus' => 'required|numeric|min:0',
-            'harga_modal_ecer' => 'required|numeric|min:0',
-            'harga_jual_kardus' => 'required|numeric|min:0',
-            'harga_jual_ecer' => 'required|numeric|min:0',
-            'isi_per_kardus' => 'required|integer|min:1',
-            'stok_kardus' => 'required|integer|min:0',
-            'stok_ecer' => 'required|integer|min:0',
+            'harga_modal_ecer'   => 'required|numeric|min:0',
+            'harga_jual_kardus'  => 'required|numeric|min:0',
+            'harga_jual_ecer'    => 'required|numeric|min:0',
+            'isi_per_kardus'     => 'required|integer|min:1',
+            'stok_kardus'        => 'required|integer|min:0',
+            'stok_ecer'          => 'required|integer|min:0',
         ]);
 
         $barang->update($validated);

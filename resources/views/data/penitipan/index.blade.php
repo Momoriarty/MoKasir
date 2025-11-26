@@ -22,9 +22,15 @@
                     <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
                         <thead class="bg-gray-200 dark:bg-gray-900">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">Nama Penitip</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">Tanggal Titip</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Nama Penitip</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Tanggal Titip</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    Aksi</th>
                             </tr>
                         </thead>
 
@@ -36,12 +42,14 @@
                                     <td class="px-4 py-2">{{ $data->tanggal_titip }}</td>
 
                                     <td class="px-4 py-2 space-x-2">
-                                        <button onclick="document.getElementById('modalEditPenitipan-{{ $data->id_penitipan }}').style.display='flex'"
+                                        <button
+                                            onclick="document.getElementById('modalEditPenitipan-{{ $data->id_penitipan }}').style.display='flex'"
                                             class="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600">
                                             Edit
                                         </button>
 
-                                        <button onclick="document.getElementById('modalDeletePenitipan-{{ $data->id_penitipan }}').style.display='flex'"
+                                        <button
+                                            onclick="document.getElementById('modalDeletePenitipan-{{ $data->id_penitipan }}').style.display='flex'"
                                             class="px-3 py-1 text-white bg-red-500 rounded hover:bg-red-600">
                                             Hapus
                                         </button>
@@ -56,7 +64,8 @@
 
                                         <h3 class="mb-4 text-xl font-bold dark:text-gray-100">Edit Data Penitipan</h3>
 
-                                        <form action="{{ route('penitipan.update', $data->id_penitipan) }}" method="POST">
+                                        <form action="{{ route('penitipan.update', $data->id_penitipan) }}"
+                                            method="POST">
                                             @csrf
                                             @method('PUT')
 
@@ -94,7 +103,8 @@
                                         <h3 class="mb-4 text-xl font-bold dark:text-gray-100">Hapus Penitipan</h3>
                                         <p class="mb-4 dark:text-gray-100">Yakin ingin menghapus data ini?</p>
 
-                                        <form action="{{ route('penitipan.destroy', $data->id_penitipan) }}" method="POST">
+                                        <form action="{{ route('penitipan.destroy', $data->id_penitipan) }}"
+                                            method="POST">
                                             @csrf
                                             @method('DELETE')
 
@@ -127,7 +137,9 @@
                         </tbody>
                     </table>
                 </div>
-
+                <div class="mt-3">
+                    {{ $penitipans->links('pagination::tailwind') }}
+                </div>
             </div>
 
         </div>
@@ -154,7 +166,8 @@
                 </div>
 
                 <div class="flex justify-end gap-3 mt-4">
-                    <button type="button" onclick="document.getElementById('modalTambahPenitipan').style.display='none'"
+                    <button type="button"
+                        onclick="document.getElementById('modalTambahPenitipan').style.display='none'"
                         class="px-4 py-2 bg-gray-300 rounded">Batal</button>
 
                     <button class="px-4 py-2 text-white bg-blue-600 rounded" type="submit">

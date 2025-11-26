@@ -27,6 +27,17 @@ Route::middleware(['auth', 'role:karyawan|admin'])->group(function () {
     Route::get('/kasir/check-stok/{id_barang}', [KasirController::class, 'checkStok'])->name('kasir.check-stok');
     Route::get('/kasir/print/{id_transaksi}', [KasirController::class, 'printStruk'])->name('kasir.print');
     Route::get('/kasir/today', [KasirController::class, 'todayTransactions'])->name('kasir.today');
+
+    // Profil
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Barang
+    Route::resource('/barang', BarangController::class);
+    Route::resource('/barangMasuk', BarangMasukController::class);
+    Route::resource('/barangRusak', BarangRusakController::class);
+
 });
 
 // =======================================
@@ -52,15 +63,6 @@ Route::middleware(['auth'])->group(function () {
 // Admin only
 // =======================================
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    // Profil admin
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Barang
-    Route::resource('/barang', BarangController::class);
-    Route::resource('/barangMasuk', BarangMasukController::class);
-    Route::resource('/barangRusak', BarangRusakController::class);
 
     // Penitipan
     Route::resource('/penitipan', PenitipanController::class);

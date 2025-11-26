@@ -8,15 +8,16 @@ class TransaksiDetail extends Model
 {
     use HasFactory;
 
-    protected $table = 'transaksi_details';
+    protected $table      = 'transaksi_details';
     protected $primaryKey = 'id_transaksi_detail';
 
     protected $fillable = [
         'id_transaksi',
         'id_barang',
-        'jumlah_ecer',
         'jumlah_kardus',
-        'harga_jual',
+        'harga_kardus', // ✅ TAMBAH INI
+        'jumlah_ecer',
+        'harga_ecer', // ✅ TAMBAH INI
         'subtotal',
     ];
 
@@ -24,7 +25,6 @@ class TransaksiDetail extends Model
     {
         return $this->belongsTo(Transaksi::class, 'id_transaksi', 'id_transaksi');
     }
-
 
     public function barang()
     {

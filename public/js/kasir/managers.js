@@ -51,9 +51,21 @@ function updateTotal() {
     btnSimpan.disabled = subtotal === 0 || !isBayarCukup;
 
     if (metode.value === "Qris" && subtotal > 0) {
-        generateQRIS(totalBayar); // Dari payment-qris.js
+        // ✅ GUNAKAN KasirState.transactionData
+        const collected = collectBarangData();
+        KasirState.transactionData = {
+            total_harga: subtotal,
+            total_bayar: totalBayar,
+            metode: metode.value,
+            barang: collected.barangStok,
+            penitipan: collected.barangPenitipan
+        };
+
+        console.log("DEBUG SET TRANSACTION DATA:", KasirState.transactionData);
+
+        generateQRIS(totalBayar);
     } else {
-        clearQRCode(); // Dari payment-qris.js
+        clearQRCode();
         qrisBox.classList.add("hidden");
     }
 }
@@ -319,6 +331,8 @@ function getCurrentSubtotal() {
 
 // CONFIRM MODAL
 function showConfirmModal() {
+    console.log("TEST SEBELUM CONFIRM:", KasirState.transactionData); // ✅ FIXED
+
     const subtotal = getCurrentSubtotal();
     if (subtotal <= 0) {
         showToast('Peringatan', 'Keranjang masih kosong', 'warning');
@@ -363,13 +377,16 @@ function showConfirmModal() {
         </div>
     `;
 
-    transactionData = {
+    // ✅ GUNAKAN KasirState.transactionData
+    KasirState.transactionData = {
         total_harga: subtotal,
         total_bayar: bayar,
         metode: metode.value,
         barang: barangStok,
         penitipan: barangPenitipan
     };
+
+    console.log("✅ SET in showConfirmModal:", KasirState.transactionData);
 
     document.getElementById('confirmModal').classList.remove('hidden');
 }
@@ -380,7 +397,8 @@ function closeConfirmModal() {
 
 // CONFIRM TRANSACTION
 function confirmTransaction() {
-    if (!transactionData) {
+    // ✅ GUNAKAN KasirState.transactionData
+    if (!KasirState.transactionData) {
         showToast('Error', 'Data transaksi tidak valid', 'error');
         closeConfirmModal();
         return;
@@ -395,7 +413,7 @@ function confirmTransaction() {
             "X-CSRF-TOKEN": "{{ csrf_token() }}",
             "Accept": "application/json"
         },
-        body: JSON.stringify(transactionData)
+        body: JSON.stringify(KasirState.transactionData) // ✅ FIXED
     })
         .then(async response => {
             const data = await response.json();
@@ -458,7 +476,7 @@ function showPrintModal(transaksi) {
 
     strukContent.innerHTML = `
         <div class="text-center mb-4">
-            <h2 class="text-lg font-bold">Struk Pembayaran</h2> 
+            <h2 class="text-lg font-bold">Struk Pembayaran</h2>
             <div class="text-sm text-gray-600 dark:text-gray-400">${tanggal} ${waktu}</div>
         </div>
         <div class="space-y-2">
@@ -466,7 +484,7 @@ function showPrintModal(transaksi) {
             <hr class="my-2 border-gray-300 dark:border-gray-600">
             <div class="flex justify-between font-bold">
                 <span>Total Bayar:</span>
-                <span></span>${formatRupiah(transaksi.total_bayar)}</span>
+                <span>${formatRupiah(transaksi.total_bayar)}</span>
             </div>
             <div class="flex justify-between">
                 <span>Metode Pembayaran:</span>
@@ -530,4 +548,4 @@ function showLoading() {
 
 function hideLoading() {
     document.getElementById('loadingOverlay').classList.add('hidden');
-}   
+}

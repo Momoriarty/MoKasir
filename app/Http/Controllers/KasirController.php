@@ -1,16 +1,15 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\Barang;
-use App\Models\Transaksi;
-use Illuminate\Http\Request;
 use App\Models\PenitipanDetail;
+use App\Models\Transaksi;
 use App\Models\TransaksiDetail;
 use App\Models\TransaksiDetailPenitipan;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
@@ -27,7 +26,7 @@ class KasirController extends Controller
                 ->get();
 
             // Kirim ke view
-            return view('kasir', compact('barangs', 'penitipanDetails'));
+            return view('kasir.kasir', compact('barangs', 'penitipanDetails'));
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memuat halaman kasir: ' . $e->getMessage());
         }
@@ -41,31 +40,31 @@ class KasirController extends Controller
 
             // Validasi input
             $validated = $request->validate([
-                'total_harga' => 'required|numeric|min:0',
-                'total_bayar' => 'required|numeric|min:0',
-                'metode' => 'required|in:Tunai,Qris',
-                'barang' => 'nullable|array',
-                'barang.*.id_barang' => 'required|exists:barangs,id_barang',
-                'barang.*.jumlah_kardus' => 'required|integer|min:0',
-                'barang.*.jumlah_ecer' => 'required|integer|min:0',
-                'barang.*.harga_kardus' => 'nullable|numeric|min:0',
-                'barang.*.harga_ecer' => 'nullable|numeric|min:0',
-                'barang.*.subtotal' => 'required|numeric|min:0',
-                'penitipan' => 'nullable|array',
+                'total_harga'                     => 'required|numeric|min:0',
+                'total_bayar'                     => 'required|numeric|min:0',
+                'metode'                          => 'required|in:Tunai,Qris',
+                'barang'                          => 'nullable|array',
+                'barang.*.id_barang'              => 'required|exists:barangs,id_barang',
+                'barang.*.jumlah_kardus'          => 'required|integer|min:0',
+                'barang.*.jumlah_ecer'            => 'required|integer|min:0',
+                'barang.*.harga_kardus'           => 'required|numeric|min:0', // ✅ UBAH jadi required
+                'barang.*.harga_ecer'             => 'required|numeric|min:0', // ✅ UBAH jadi required
+                'barang.*.subtotal'               => 'required|numeric|min:0',
+                'penitipan'                       => 'nullable|array',
                 'penitipan.*.id_penitipan_detail' => 'required|exists:penitipan_details,id_penitipan_detail',
-                'penitipan.*.jumlah' => 'required|integer|min:1',
-                'penitipan.*.harga_jual' => 'required|numeric|min:0',
-                'penitipan.*.subtotal' => 'required|numeric|min:0',
+                'penitipan.*.jumlah'              => 'required|integer|min:1',
+                'penitipan.*.harga_jual'          => 'required|numeric|min:0',
+                'penitipan.*.subtotal'            => 'required|numeric|min:0',
             ]);
 
             // Validasi minimal harus ada barang atau penitipan
             if (
-                (!$request->has('barang') || count($request->barang) == 0) &&
-                (!$request->has('penitipan') || count($request->penitipan) == 0)
+                (! $request->has('barang') || count($request->barang) == 0) &&
+                (! $request->has('penitipan') || count($request->penitipan) == 0)
             ) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Keranjang kosong, minimal harus ada 1 barang'
+                    'message' => 'Keranjang kosong, minimal harus ada 1 barang',
                 ], 400);
             }
 
@@ -73,7 +72,7 @@ class KasirController extends Controller
             if ($request->total_bayar < $request->total_harga) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Jumlah bayar kurang dari total harga'
+                    'message' => 'Jumlah bayar kurang dari total harga',
                 ], 400);
             }
 
@@ -84,7 +83,7 @@ class KasirController extends Controller
                 foreach ($request->barang as $item) {
                     $barang = Barang::lockForUpdate()->find($item['id_barang']);
 
-                    if (!$barang) {
+                    if (! $barang) {
                         throw new \Exception("Barang ID {$item['id_barang']} tidak ditemukan");
                     }
 
@@ -110,7 +109,7 @@ class KasirController extends Controller
                 foreach ($request->penitipan as $item) {
                     $penitipanDetail = PenitipanDetail::lockForUpdate()->find($item['id_penitipan_detail']);
 
-                    if (!$penitipanDetail) {
+                    if (! $penitipanDetail) {
                         throw new \Exception("Penitipan ID {$item['id_penitipan_detail']} tidak ditemukan");
                     }
 
@@ -131,11 +130,11 @@ class KasirController extends Controller
 
             // ========== BUAT TRANSAKSI ==========
             $transaksi = Transaksi::create([
-                'tanggal' => Carbon::now(),
-                'id_user' => Auth::id(),
+                'tanggal'     => Carbon::now(),
+                'id_user'     => Auth::id(),
                 'total_harga' => $totalHargaFinal,
                 'total_bayar' => $request->total_bayar,
-                'metode' => $request->metode,
+                'metode'      => $request->metode,
             ]);
 
             \Log::info('Transaksi created:', ['id' => $transaksi->id_transaksi]);
@@ -146,13 +145,15 @@ class KasirController extends Controller
                     // Ambil barang dengan lock
                     $barang = Barang::lockForUpdate()->find($item['id_barang']);
 
-                    // Simpan detail transaksi
+                    // ✅ SIMPAN detail transaksi DENGAN harga_kardus dan harga_ecer
                     TransaksiDetail::create([
-                        'id_transaksi' => $transaksi->id_transaksi,
-                        'id_barang' => $item['id_barang'],
+                        'id_transaksi'  => $transaksi->id_transaksi,
+                        'id_barang'     => $item['id_barang'],
                         'jumlah_kardus' => $item['jumlah_kardus'],
-                        'jumlah_ecer' => $item['jumlah_ecer'],
-                        'subtotal' => $item['subtotal'],
+                        'harga_kardus'  => $item['harga_kardus'], // ✅ TAMBAH INI
+                        'jumlah_ecer'   => $item['jumlah_ecer'],
+                        'harga_ecer'    => $item['harga_ecer'], // ✅ TAMBAH INI
+                        'subtotal'      => $item['subtotal'],
                     ]);
 
                     // Update stok barang
@@ -161,11 +162,11 @@ class KasirController extends Controller
                     $barang->save();
 
                     \Log::info("Stok barang updated", [
-                        'barang' => $barang->nama_barang,
-                        'kardus' => -$item['jumlah_kardus'],
-                        'ecer' => -$item['jumlah_ecer'],
+                        'barang'                => $barang->nama_barang,
+                        'kardus'                => -$item['jumlah_kardus'],
+                        'ecer'                  => -$item['jumlah_ecer'],
                         'stok_kardus_remaining' => $barang->stok_kardus,
-                        'stok_ecer_remaining' => $barang->stok_ecer
+                        'stok_ecer_remaining'   => $barang->stok_ecer,
                     ]);
                 }
             }
@@ -178,11 +179,11 @@ class KasirController extends Controller
 
                     // Simpan detail transaksi penitipan
                     TransaksiDetailPenitipan::create([
-                        'id_transaksi' => $transaksi->id_transaksi,
+                        'id_transaksi'        => $transaksi->id_transaksi,
                         'id_penitipan_detail' => $item['id_penitipan_detail'],
-                        'jumlah' => $item['jumlah'],
-                        'harga_jual' => $item['harga_jual'],
-                        'subtotal' => $item['subtotal'],
+                        'jumlah'              => $item['jumlah'],
+                        'harga_jual'          => $item['harga_jual'],
+                        'subtotal'            => $item['subtotal'],
                     ]);
 
                     // Update stok penitipan
@@ -191,9 +192,9 @@ class KasirController extends Controller
                     $penitipanDetail->save();
 
                     \Log::info("Stok penitipan updated", [
-                        'barang' => $penitipanDetail->nama_barang,
-                        'jumlah_terjual' => $item['jumlah'],
-                        'jumlah_sisa_remaining' => $penitipanDetail->jumlah_sisa
+                        'barang'                => $penitipanDetail->nama_barang,
+                        'jumlah_terjual'        => $item['jumlah'],
+                        'jumlah_sisa_remaining' => $penitipanDetail->jumlah_sisa,
                     ]);
                 }
             }
@@ -202,45 +203,73 @@ class KasirController extends Controller
 
             \Log::info('Transaction completed successfully');
 
+            // ✅ Load relationships untuk data struk
+            $transaksi->load('details.barang', 'detailPenitipans.penitipanDetail.penitipan');
+
+            // ✅ Format detail_transaksi untuk response
+            $detailTransaksi = [];
+
+            foreach ($transaksi->details as $detail) {
+                $detailTransaksi[] = [
+                    'nama_barang'   => $detail->barang->nama_barang,
+                    'jumlah_kardus' => $detail->jumlah_kardus,
+                    'harga_kardus'  => $detail->harga_kardus,
+                    'jumlah_ecer'   => $detail->jumlah_ecer,
+                    'harga_ecer'    => $detail->harga_ecer,
+                    'subtotal'      => $detail->subtotal,
+                ];
+            }
+
+            foreach ($transaksi->detailPenitipans as $detail) {
+                $detailTransaksi[] = [
+                    'nama_barang' => $detail->penitipanDetail->nama_barang,
+                    'jumlah'      => $detail->jumlah,
+                    'harga_jual'  => $detail->harga_jual,
+                    'subtotal'    => $detail->subtotal,
+                    'penitip'     => $detail->penitipanDetail->penitipan->nama_penitip,
+                ];
+            }
+
             return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil disimpan',
+                'success'   => true,
+                'message'   => 'Transaksi berhasil disimpan',
                 'transaksi' => [
-                    'id_transaksi' => $transaksi->id_transaksi,
-                    'total_harga' => $transaksi->total_harga,
-                    'total_bayar' => $transaksi->total_bayar,
-                    'metode' => $transaksi->metode,
-                    'kembalian' => $transaksi->total_bayar - $transaksi->total_harga,
-                    'tanggal' => $transaksi->tanggal->format('Y-m-d H:i:s'),
-                ]
+                    'id_transaksi'     => $transaksi->id_transaksi,
+                    'total_harga'      => $transaksi->total_harga,
+                    'total_bayar'      => $transaksi->total_bayar,
+                    'metode'           => $transaksi->metode,
+                    'kembalian'        => $transaksi->total_bayar - $transaksi->total_harga,
+                    'tanggal'          => $transaksi->tanggal->format('Y-m-d H:i:s'),
+                    'detail_transaksi' => $detailTransaksi, // ✅ TAMBAH INI untuk struk
+                ],
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
 
             \Log::error('Validation Error:', [
-                'errors' => $e->errors(),
-                'request' => $request->all()
+                'errors'  => $e->errors(),
+                'request' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
-                'error' => $e->errors()
+                'errors'  => $e->errors(),
             ], 422);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             \Log::error('Kasir Store Error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'request' => $request->all()
+                'trace'   => $e->getTraceAsString(),
+                'request' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal menyimpan transaksi',
-                'error' => $e->getMessage()
+                'message' => $e->getMessage(), // ✅ Return pesan error asli, bukan generic
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -252,14 +281,14 @@ class KasirController extends Controller
             $barang = Barang::findOrFail($id_barang);
 
             return response()->json([
-                'success' => true,
+                'success'     => true,
                 'stok_kardus' => $barang->stok_kardus,
-                'stok_ecer' => $barang->stok_ecer,
+                'stok_ecer'   => $barang->stok_ecer,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Barang tidak ditemukan'
+                'message' => 'Barang tidak ditemukan',
             ], 404);
         }
     }
@@ -271,16 +300,16 @@ class KasirController extends Controller
             $penitipanDetail = PenitipanDetail::with('penitipan')->findOrFail($id_penitipan_detail);
 
             return response()->json([
-                'success' => true,
-                'jumlah_sisa' => $penitipanDetail->jumlah_sisa,
-                'harga_jual' => $penitipanDetail->harga_jual,
-                'nama_barang' => $penitipanDetail->nama_barang,
+                'success'      => true,
+                'jumlah_sisa'  => $penitipanDetail->jumlah_sisa,
+                'harga_jual'   => $penitipanDetail->harga_jual,
+                'nama_barang'  => $penitipanDetail->nama_barang,
                 'nama_penitip' => $penitipanDetail->penitipan->nama_penitip,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Barang penitipan tidak ditemukan'
+                'message' => 'Barang penitipan tidak ditemukan',
             ], 404);
         }
     }
@@ -292,7 +321,7 @@ class KasirController extends Controller
             $transaksi = Transaksi::with([
                 'user',
                 'details.barang',
-                'detailPenitipans.penitipanDetail.penitipan'
+                'detailPenitipans.penitipanDetail.penitipan',
             ])->findOrFail($id_transaksi);
 
             return view('kasir.print-struk', compact('transaksi'));
@@ -317,17 +346,17 @@ class KasirController extends Controller
             $totalTransaksi = $transaksis->count();
 
             return response()->json([
-                'success' => true,
+                'success'    => true,
                 'transaksis' => $transaksis,
-                'summary' => [
+                'summary'    => [
                     'total_penjualan' => $totalPenjualan,
                     'total_transaksi' => $totalTransaksi,
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memuat data transaksi'
+                'message' => 'Gagal memuat data transaksi',
             ], 500);
         }
     }

@@ -40,7 +40,9 @@
                         @include('kasir.partials.form-barang', ['barangs' => $barangs])
 
                         <!-- FORM PENITIPAN -->
-                        @include('kasir.partials.form-penitipan', ['penitipanDetails' => $penitipanDetails])
+                        @include('kasir.partials.form-penitipan', [
+                            'penitipanDetails' => $penitipanDetails,
+                        ])
 
                         <!-- TABEL -->
                         @include('kasir.partials.table-cart')
@@ -53,11 +55,68 @@
         </div>
     </div>
 
-    <!-- SCRIPTS -->
+    <!-- QR Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+    <!-- SweetAlert2 + Toast -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Configuration
+        const Toast = {
+            timeoutId: null,
+
+            show(title, message, type = "success") {
+                const toastBox = document.getElementById("toast");
+                const icon = document.getElementById("toast-icon");
+                const titleEl = document.getElementById("toast-title");
+                const messageEl = document.getElementById("toast-message");
+
+                if (!toastBox) return console.error("Toast HTML tidak ditemukan!");
+
+                // Set icon & warna
+                switch (type) {
+                    case "success":
+                        icon.textContent = "✓";
+                        toastBox.classList.remove("border-red-500", "border-yellow-500");
+                        toastBox.classList.add("border-green-500");
+                        break;
+                    case "error":
+                        icon.textContent = "✕";
+                        toastBox.classList.remove("border-green-500", "border-yellow-500");
+                        toastBox.classList.add("border-red-500");
+                        break;
+                    case "warning":
+                        icon.textContent = "!";
+                        toastBox.classList.remove("border-green-500", "border-red-500");
+                        toastBox.classList.add("border-yellow-500");
+                        break;
+                }
+
+                titleEl.textContent = title;
+                messageEl.textContent = message;
+
+                toastBox.classList.remove("hidden");
+
+                // Auto-hide after 3 sec
+                clearTimeout(this.timeoutId);
+                this.timeoutId = setTimeout(() => this.hide(), 3000);
+            },
+
+            hide() {
+                const toastBox = document.getElementById("toast");
+                if (toastBox) {
+                    toastBox.classList.add("hidden");
+                }
+            }
+        };
+
+        // Make hideToast() available globally
+        window.hideToast = () => Toast.hide();
+    </script>
+
+
+    <!-- Config -->
+    <script>
         window.kasirConfig = {
             csrfToken: "{{ csrf_token() }}",
             storeUrl: "{{ route('kasir.store') }}",
@@ -72,7 +131,10 @@
             penitipanDetails: @json($penitipanDetails)
         };
     </script>
+
+    <!-- Your scripts (Toast sudah tersedia) -->
     <script src="{{ asset('js/kasir/main.js') }}"></script>
     <script src="{{ asset('js/kasir/managers.js') }}"></script>
     <script src="{{ asset('js/kasir/payment-qris.js') }}"></script>
+
 </x-app-layout>

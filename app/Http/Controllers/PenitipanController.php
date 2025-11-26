@@ -12,7 +12,7 @@ class PenitipanController extends Controller
      */
     public function index()
     {
-        $penitipans = Penitipan::all();
+        $penitipans = Penitipan::paginate(2);
         return view('data.penitipan.index', compact('penitipans'));
     }
 

@@ -24,22 +24,22 @@
                         <thead class="bg-gray-200 dark:bg-gray-900">
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-900 uppercase dark:text-gray-300">
                                     Barang</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-900 uppercase dark:text-gray-300">
                                     Jumlah Kardus</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-900 uppercase dark:text-gray-300">
                                     Jumlah Ecer</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-900 uppercase dark:text-gray-300">
                                     Keterangan</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-900 uppercase dark:text-gray-300">
                                     Tanggal Rusak</th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-900 dark:text-gray-300 uppercase tracking-wider">
+                                    class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-900 uppercase dark:text-gray-300">
                                     Aksi</th>
                             </tr>
                         </thead>
@@ -162,6 +162,9 @@
 
                         </tbody>
                     </table>
+                    <div class="flex justify-center mt-4">
+                     {{ $barangRusaks->onEachSide(1)->links('pagination::tailwind') }}
+                    </div>
                 </div>
 
             </div>

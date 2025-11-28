@@ -11,10 +11,10 @@ class BarangMasukController extends Controller
 {
     public function index()
     {
-        $barangMasuks = BarangMasuk::with('barang')->get();
-        $barangs = Barang::all();
+    $barangMasuks = BarangMasuk::with('barang')->paginate(10);
+    $barangs = Barang::all(); // <-- ini wajib ditambahkan
 
-        return view('data.barang_masuk.index', compact('barangMasuks', 'barangs'));
+    return view('data.barang_masuk.index', compact('barangMasuks', 'barangs'));
     }
 
     public function store(Request $request)

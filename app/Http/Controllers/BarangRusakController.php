@@ -10,9 +10,10 @@ class BarangRusakController extends Controller
 {
     public function index()
     {
-        $barangRusaks = BarangRusak::with('barang')->get();
-        $barangs = Barang::all();
-        return view('data.barang_rusak.index', compact('barangRusaks', 'barangs'));
+    $barangRusaks = BarangRusak::with('barang')->paginate(10);
+    $barangs = Barang::all(); // <-- ini wajib ditambahkan
+
+    return view('data.barang_rusak.index', compact('barangRusaks', 'barangs'));
     }
 
     public function store(Request $request)

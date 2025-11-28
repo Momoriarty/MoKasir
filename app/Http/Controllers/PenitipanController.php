@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Penitipan;
@@ -10,9 +9,28 @@ class PenitipanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $penitipans = Penitipan::paginate(2);
+
+        // Query tanpa eager loading dulu
+        $query = Penitipan::query();
+
+        // Filter berdasarkan nama penitip
+        if ($request->filled('nama_penitip')) {
+            $query->where('nama_penitip', 'like', '%' . $request->nama_penitip . '%');
+        }
+
+        // Filter berdasarkan tanggal dari
+        if ($request->filled('tanggal_dari')) {
+            $query->whereDate('tanggal_titip', '>=', $request->tanggal_dari);
+        }
+
+        // Filter berdasarkan tanggal sampai
+        if ($request->filled('tanggal_sampai')) {
+            $query->whereDate('tanggal_titip', '<=', $request->tanggal_sampai);
+        }
+
+        $penitipans = $query->latest('created_at')->paginate(10);
         return view('data.penitipan.index', compact('penitipans'));
     }
 
@@ -30,7 +48,7 @@ class PenitipanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_penitip' => 'required|string|max:100',
+            'nama_penitip'  => 'required|string|max:100',
             'tanggal_titip' => 'required|date',
         ]);
 
@@ -62,7 +80,7 @@ class PenitipanController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'nama_penitip' => 'required|string|max:100',
+            'nama_penitip'  => 'required|string|max:100',
             'tanggal_titip' => 'required|date',
         ]);
 

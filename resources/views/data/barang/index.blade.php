@@ -9,21 +9,29 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="p-6 overflow-hidden bg-white shadow-sm dark:bg-gray-800 sm:rounded-lg">
 
-                <!-- Header & Search -->
-                <div class="flex flex-col gap-4 mb-4 md:flex-row md:items-center md:justify-between">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang</h3>
-                    <form method="GET" action="{{ route('barang.index') }}" class="flex gap-2">
-                        <input type="text" name="nama_barang" value="{{ request('nama_barang') }}"
-                            placeholder="Cari nama barang..."
-                            class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-100">
-                        <button type="submit"
-                            class="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600">Search</button>
-                    </form>
-                    <button onclick="document.getElementById('modalTambah').style.display='flex'"
-                        class="px-4 py-2 font-semibold text-white bg-green-500 rounded hover:bg-green-600">
-                        Tambah Barang
-                    </button>
-                </div>
+<!-- Header -->
+<div class="flex items-center justify-between mb-4">
+    <!-- Kiri: Nama tabel + Search -->
+    <div class="flex items-center gap-2">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Daftar Barang</h3>
+        <form method="GET" action="{{ route('barang.index') }}" class="flex gap-2">
+            <input type="text" name="nama_barang" value="{{ request('nama_barang') }}"
+                placeholder="Cari nama barang..."
+                class="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:text-gray-100">
+            <button type="submit"
+                class="px-4 py-2 font-semibold text-white bg-gray-500 rounded hover:bg-gray-600">Search</button>
+        </form>
+    </div>
+
+    <!-- Kanan: Tombol Tambah Barang -->
+    <div>
+        <button onclick="document.getElementById('modalTambah').style.display='flex'"
+            class="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-600">
+            Tambah Barang
+        </button>
+    </div>
+</div>
+
 
                 <!-- Tabel Barang -->
                 <div class="w-full overflow-x-auto">

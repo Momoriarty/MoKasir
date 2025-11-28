@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
-use App\Models\BarangMasuk;
 use Illuminate\Http\Request;
 
 class BarangController extends Controller
@@ -10,79 +10,73 @@ class BarangController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $barangs = Barang::paginate(10); 
-        return view('data.barang.index', compact('barangs'));
+        // Ambil keyword search
+        $search = $request->input('nama_barang');
+
+        // Query dengan scope search
+        $barangs = Barang::searchNama($search)
+            ->latest('created_at')
+            ->paginate(10)
+            ->withQueryString(); // agar pagination tetap menyertakan query search
+
+        return view('data.barang.index', compact('barangs', 'search'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function create()
+    {
+        return view('data.barang.create');
+    }
+
     public function store(Request $request)
     {
-        // Validasi input
-        $validated = $request->validate([
-            'nama_barang'        => 'required|string|max:255',
-            'kategori'           => 'nullable|string|max:255',
-            'harga_modal_kardus' => 'required|numeric|min:0',
-            'harga_modal_ecer'   => 'required|numeric|min:0',
-            'harga_jual_kardus'  => 'required|numeric|min:0',
-            'harga_jual_ecer'    => 'required|numeric|min:0',
-            'isi_per_kardus'     => 'required|integer|min:1',
-            'stok_kardus'        => 'required|integer|min:0',
-            'stok_ecer'          => 'required|integer|min:0',
+        $request->validate([
+            'nama_barang' => 'required|string|max:100',
+            'kategori'    => 'required|string|max:50',
+            'harga_modal_kardus' => 'required|integer',
+            'harga_modal_ecer'   => 'required|integer',
+            'harga_jual_kardus'  => 'required|integer',
+            'harga_jual_ecer'    => 'required|integer',
+            'isi_per_kardus'     => 'required|integer',
+            'stok_kardus'        => 'required|integer',
+            'stok_ecer'          => 'required|integer',
         ]);
 
-        // Simpan barang
-        $barang = Barang::create($validated);
+        Barang::create($request->all());
 
-        // Jika stok awal > 0, buat record barang masuk
-        if ($validated['stok_kardus'] > 0 || $validated['stok_ecer'] > 0) {
-            BarangMasuk::create([
-                'id_barang'     => $barang->id_barang,
-                'jumlah_kardus' => $validated['stok_kardus'],
-                'jumlah_ecer'   => $validated['stok_ecer'],
-                'tanggal_masuk' => now(), // atau bisa request dari form
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Barang berhasil ditambahkan' .
-            (($validated['stok_kardus'] > 0 || $validated['stok_ecer'] > 0) ? ' dan stok masuk otomatis tercatat.' : '.'));
+        return back()->with('success', 'Barang berhasil ditambahkan.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
+    public function edit(string $id)
     {
         $barang = Barang::findOrFail($id);
+        return view('data.barang.edit', compact('barang'));
+    }
 
-        $validated = $request->validate([
-            'nama_barang'        => 'required|string|max:255',
-            'kategori'           => 'nullable|string|max:255',
-            'harga_modal_kardus' => 'required|numeric|min:0',
-            'harga_modal_ecer'   => 'required|numeric|min:0',
-            'harga_jual_kardus'  => 'required|numeric|min:0',
-            'harga_jual_ecer'    => 'required|numeric|min:0',
-            'isi_per_kardus'     => 'required|integer|min:1',
-            'stok_kardus'        => 'required|integer|min:0',
-            'stok_ecer'          => 'required|integer|min:0',
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'nama_barang' => 'required|string|max:100',
+            'kategori'    => 'required|string|max:50',
+            'harga_modal_kardus' => 'required|integer',
+            'harga_modal_ecer'   => 'required|integer',
+            'harga_jual_kardus'  => 'required|integer',
+            'harga_jual_ecer'    => 'required|integer',
+            'isi_per_kardus'     => 'required|integer',
+            'stok_kardus'        => 'required|integer',
+            'stok_ecer'          => 'required|integer',
         ]);
 
-        $barang->update($validated);
+        $barang = Barang::findOrFail($id);
+        $barang->update($request->all());
 
-        return redirect()->back()->with('success', 'Barang berhasil diupdate.');
+        return back()->with('success', 'Barang berhasil diubah.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
+    public function destroy(string $id)
     {
-        $barang = Barang::findOrFail($id);
-        $barang->delete();
-
-        return redirect()->back()->with('success', 'Barang berhasil dihapus.');
+        Barang::findOrFail($id)->delete();
+        return back()->with('success', 'Barang berhasil dihapus.');
     }
 }
